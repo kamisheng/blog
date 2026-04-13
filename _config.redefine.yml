@@ -88,7 +88,7 @@ global:
   # Whether to enable Preloader.
   preloader:
     enable: true
-    custom_message: "梦境加载中..."
+    custom_message: "kami's BLOG"
   side_tools:
     # Whether to enable gear rotation animation for settings button
     gear_rotation: true
@@ -137,8 +137,8 @@ home_banner:
   subtitle:
     text: ["I didn't call it fate until I met you...", "Things should be done slowly and people should like them slowly...", "May we have long-term happiness and dreams...", "May the world be more gentle,and may you be less sad..."] # subtitle text, array
     hitokoto:  # 一言配置
-      enable: true # Whether to enable hitokoto
-      show_author: true # Whether to show author
+      enable: false # Whether to enable hitokoto
+      show_author: false # Whether to show author
       api: https://v1.hitokoto.cn/ # API URL, can add types, see https://developer.hitokoto.cn/sentence/#%E5%8F%A5%E5%AD%90%E7%B1%BB%E5%9E%8B-%E5%8F%82%E6%95%B0
     typing_speed: 100 # Typing speed (ms)
     backing_speed: 80 # Backing speed (ms)
@@ -196,8 +196,8 @@ navbar:
   auto_hide: false
   # Navbar background color
   color:
-    left: "#f78736" #left side 
-    right: "#367df7"  #right side
+    left: "#5D3FD3" #left side 
+    right: "#F59E0B"  #right side
     transparency: 35 #percent (10-99)
   # Navbar width (usually no need to modify)
   width:
@@ -208,12 +208,23 @@ navbar:
     Home: 
       path: / 
       icon: fa-regular fa-house # can be empty
-    # Archives: 
-    #   path: /archives 
-    #   icon: fa-regular fa-archive # can be empty
-    # Status: 
-    #   path: https://status.ohevan.com/
-    #   icon: fa-regular fa-chart-bar
+    Archives: 
+      path: /archives 
+      icon: fa-regular fa-archive # can be empty
+    Tags:
+      path: /tags
+      icon: fa-solid fa-tags
+    GitHub:
+      path: https://github.com/kamisheng
+      icon: fa-brands fa-github
+    Links: 
+      icon: fa-regular fa-link
+      submenus:
+        About: /about
+        留言板: /comments
+        技能树: /skills
+        时间轴: /timeline
+        随机文章: /random
     # About: 
     #   icon: fa-regular fa-user
     #   submenus:
@@ -221,17 +232,12 @@ navbar:
     #     Github: https://github.com/EvanNotFound/hexo-theme-redefine
     #     Blog: https://ohevan.com
     #     Friends: /friends
-    # Links: 
-    #   icon: fa-regular fa-link
-    #   submenus:
-    #     Link1: /link1
-    #     Link2: /link2
-    #     Link3: /link3
+      
     # ...... # you can add more
   # Navbar search (local search). Requires hexo-generator-searchdb (npm i hexo-generator-searchdb). See https://github.com/theme-next/hexo-generator-searchdb
   search:
     # Whether to enable
-    enable: false
+    enable: true
     # Preload search data when the page loads
     preload: true
 # NAVIGATION BAR <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end
