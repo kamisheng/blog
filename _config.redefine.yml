@@ -132,7 +132,7 @@ home_banner:
     light: /images/wallhaven-wqery6-light.webp # light mode
     dark: /images/wallhaven-wqery6-dark.webp # dark mode
   # Home banner title
-  title: "kami's BLOG"
+  title: "kami_Sheng's BLOG"
   # Home banner subtitle
   subtitle:
     text: ["I didn't call it fate until I met you...", "Things should be done slowly and people should like them slowly...", "May we have long-term happiness and dreams...", "May the world be more gentle,and may you be less sad..."] # subtitle text, array
@@ -149,7 +149,7 @@ home_banner:
   # Color of home banner text
   text_color: 
     light: "#000000"      # 浅色模式：黑色
-    dark: "#00FFC6"       # 暗色模式：亮蓝绿色
+    dark: "#F0F0F0"       # 暗色模式：亮灰
   # Specific style of the text
   text_style: 
     # Title font size
