@@ -129,8 +129,8 @@ home_banner:
   style: fixed # static or fixed
   # Home banner image
   image: 
-    light: /images/wallhaven-wqery6-light.webp # light mode
-    dark: /images/wallhaven-wqery6-dark.webp # dark mode
+    light: /images/119687839_p0-先鋭.jpg # light mode
+    dark: /images/137249989_p0-Sosein.jpg # dark mode
   # Home banner title
   title: "kami_Sheng's BLOG"
   # Home banner subtitle
