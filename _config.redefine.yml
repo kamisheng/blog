@@ -149,7 +149,7 @@ home_banner:
   # Color of home banner text
   text_color: 
     light: "#000000"      # 浅色模式：黑色
-    dark: "#F0F0F0"       # 暗色模式：亮灰
+    dark: "#2D2D2D"       # 暗色模式：亮灰
   # Specific style of the text
   text_style: 
     # Title font size
@@ -223,18 +223,11 @@ navbar:
     Links: 
       icon: fa-regular fa-link
       submenus:
-        About: 
-          path: /about
-          icon: fa-regular fa-user
-        留言板: 
-          path: /comments
-          icon: fa-regular fa-comment
-        技能树: 
-          path: /skills
-          icon: fa-solid fa-code-branch
-        随机文章: 
-          path: /random
-          icon: fa-solid fa-shuffle
+        About: /about
+        留言板: /comments
+        技能树: /skills
+        随机文章: /random
+          
     # About: 
     #   icon: fa-regular fa-user
     #   submenus:

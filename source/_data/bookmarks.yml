@@ -5,16 +5,79 @@
       link: https://code.visualstudio.com
       description: 微软出品的轻量级代码编辑器
       image: https://code.visualstudio.com/favicon.ico
-    - name: Postman
-      link: https://www.postman.com
-      description: API 测试与调试工具
-      image: https://www.postman.com/favicon.ico
-    - name: Figma
-      link: https://www.figma.com
-      description: 团队协作的 UI 设计工具
-      image: https://www.figma.com/favicon.ico
-      
-- category: AI 助手
+    - name: IntelliJ IDEA
+      link: https://www.jetbrains.com/idea/
+      description: Java 开发首选 IDE
+      image: https://www.jetbrains.com/favicon.ico
+    - name: PyCharm
+      link: https://www.jetbrains.com/pycharm/
+      description: Python IDE
+      image: https://www.jetbrains.com/favicon.ico
+    - name: WebStorm
+      link: https://www.jetbrains.com/webstorm/
+      description: JavaScript/TypeScript IDE
+      image: https://www.jetbrains.com/favicon.ico
+    - name: Sourcetree
+      link: https://www.sourcetreeapp.com
+      description: Git 可视化客户端
+      image: https://www.sourcetreeapp.com/favicon.ico
+    - name: Docker Desktop
+      link: https://www.docker.com/products/docker-desktop/
+      description: 容器化开发工具
+      image: https://www.docker.com/favicon.ico
+
+- category: 运行环境
+  icon: fa-code
+  items:
+    - name: MinGW-w64
+      link: https://www.mingw-w64.org
+      description: Windows 原生 C/C++ 编译环境
+      image: https://www.mingw-w64.org/favicon.ico
+    - name: GCC (WSL/Linux)
+      link: https://gcc.gnu.org
+      description: Linux/WSL 下的 C/C++ 编译环境
+      image: https://gcc.gnu.org/favicon.ico
+    - name: JDK (Adoptium)
+      link: https://adoptium.net
+      description: 开源 Java 运行环境
+      image: https://adoptium.net/favicon.ico
+    - name: Python
+      link: https://www.python.org
+      description: Python 官方运行环境
+      image: https://www.python.org/favicon.ico
+    - name: Node.js
+      link: https://nodejs.org
+      description: JavaScript/TypeScript 运行时
+      image: https://nodejs.org/favicon.ico
+    - name: Git
+      link: https://git-scm.com
+      description: 分布式版本控制系统
+      image: https://git-scm.com/favicon.ico
+    - name: Nginx
+      link: https://nginx.org
+      description: 高性能 Web 服务器
+      image: https://nginx.org/favicon.ico
+    - name: Docker
+      link: https://www.docker.com
+      description: 容器化运行环境
+      image: https://www.docker.com/favicon.ico
+    - name: Go
+      link: https://go.dev
+      description: Go 语言运行环境
+      image: https://go.dev/favicon.ico
+    - name: Rust
+      link: https://www.rust-lang.org
+      description: Rust 语言运行环境
+      image: https://www.rust-lang.org/static/images/favicon.svg
+    - name: Kotlin
+      link: https://kotlinlang.org
+      description: 现代 JVM 语言，Android 官方支持
+      image: https://kotlinlang.org/favicon.ico
+    - name: RabbitMQ
+      link: https://www.rabbitmq.com
+      description: 消息队列中间件
+      image: https://www.rabbitmq.com/favicon.ico
+- category: AI助手
   icon: fa-robot
   items:
     - name: ChatGPT
@@ -24,5 +87,160 @@
     - name: Claude
       link: https://claude.ai
       description: Anthropic 的 AI 助手，上下文超长
-      image: https://claude.ai/favicon.ico
-    
+      image: https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/cd02a42d9-Vq_H3mgS.svg
+    - name: Gemini
+      link: https://gemini.google.com
+      description: Google 的 AI 助手，多模态能力强
+      image: https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg
+    - name: Grok
+      link: https://grok.com
+      description: xAI 的 AI 助手，风格幽默
+      image: https://grok.com/images/favicon.svg
+
+- category: 常用工具
+  icon: fa-tools
+  items:
+    - name: GitHub
+      link: https://github.com
+      description: 代码托管平台，开发者必备
+      image: https://github.com/favicon.ico
+    - name: X (Twitter)
+      link: https://twitter.com
+      description: 社交平台，关注技术动态
+      image: https://twitter.com/favicon.ico
+    - name: Telegram
+      link: https://telegram.org
+      description: 即时通讯软件
+      image: https://telegram.org/favicon.ico
+    - name: Facebook
+      link: https://www.facebook.com
+      description: 社交平台
+      image: https://www.facebook.com/favicon.ico
+    - name: Typora
+      link: https://typora.io
+      description: Markdown 编辑器
+      image: https://typora.io/img/favicon-64.png
+    - name: Obsidian
+      link: https://obsidian.md
+      description: 强大的知识管理工具
+      image: https://obsidian.md/favicon.ico
+    - name: Clash Verge
+      link: https://github.com/clash-verge-rev/clash-verge-rev
+      description: 网络代理工具
+      image: https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/dbaadd00-9498-4936-8201-334efaafa056/logo_(1)/public
+    - name: VMware
+      link: https://www.vmware.com/products/workstation-pro.html
+      description: 虚拟机软件
+      image: https://www.vmware.com/vm-favicon.png
+    - name: Chrome
+      link: https://www.google.com/chrome
+      description: Google 浏览器
+      image: https://www.google.com/chrome/static/images/favicons/favicon-32x32.png
+    - name: ToDesk
+      link: https://www.todesk.com
+      description: 远程控制软件
+      image: https://www.todesk.com/dist/img/7a7020a.svg
+    - name: JMeter
+      link: https://jmeter.apache.org
+      description: Apache 压力测试工具，模拟高并发
+      image: https://jmeter.apache.org/images/favicon.png
+    - name: Tomcat
+      link: https://tomcat.apache.org
+      description: Java Web 服务器 / Servlet 容器
+      image: https://tomcat.apache.org/favicon.ico
+
+- category: SQL 数据库
+  icon: fa-database
+  items:
+    - name: MySQL
+      link: https://www.mysql.com
+      description: 最流行的开源关系型数据库，适用于 Web 应用
+      image: https://labs.mysql.com/common/themes/sakila/favicon.ico
+    - name: PostgreSQL
+      link: https://www.postgresql.org
+      description: 功能强大的开源关系型数据库，支持高级特性
+      image: https://www.postgresql.org/favicon.ico
+    - name: SQLite
+      link: https://www.sqlite.org
+      description: 轻量级嵌入式数据库，无需服务器
+      image: https://www.sqlite.org/favicon.ico
+    - name: MariaDB
+      link: https://mariadb.org
+      description: MySQL 的开源分支，兼容性好
+      image: https://mariadb.org/favicon.ico
+    - name: Oracle
+      link: https://www.oracle.com/database/
+      description: 企业级商业数据库
+      image: https://www.oracle.com/favicon.ico
+    - name: SQL Server
+      link: https://www.microsoft.com/sql-server
+      description: 微软的企业级数据库
+      image: https://www.microsoft.com/favicon.ico
+    - name: Navicat for MySQL
+      link: https://www.navicat.com/en/products/navicat-for-mysql
+      description: MySQL可视化GUI
+      image: https://www.navicat.com/images/Navicat_16_Premium_win_256x256.ico
+
+- category: NoSQL 数据库
+  icon: fa-server
+  items:
+    - name: Redis
+      link: https://redis.io
+      description: 高性能内存数据库，常用于缓存和消息队列（推荐在Linux装载redis）
+      image: https://redis.io/favicon.ico
+    - name: MongoDB
+      link: https://www.mongodb.com
+      description: 流行的文档型 NoSQL 数据库
+      image: https://www.mongodb.com/favicon.ico
+    - name: Elasticsearch
+      link: https://www.elastic.co
+      description: 分布式搜索和分析引擎
+      image: https://www.elastic.co/favicon.ico
+    - name: Cassandra
+      link: https://cassandra.apache.org
+      description: 高可扩展的分布式 NoSQL 数据库
+      image: /images/Cassandra.png
+    - name: Neo4j
+      link: https://neo4j.com
+      description: 图数据库，适合处理关系数据
+      image: https://neo4j.com/favicon.ico
+    - name: InfluxDB
+      link: https://www.influxdata.com
+      description: 时序数据库，适合 IoT 和监控
+      image: https://www.influxdata.com/images/cubo.png
+    - name: RESP 下载 (Windows)
+      link: https://github.com/uglide/RedisDesktopManager/releases
+      description: Redis可视化GUI
+      image: https://github.com/favicon.ico
+
+- category: 宝藏小网站
+  icon: fa-compass
+  items:
+    - name: Font Awesome
+      link: https://fontawesome.com/icons
+      description: 可以根据提示词查询Font Awesome图标
+      image: https://fontawesome.com/favicon.ico
+    - name: Vercel
+      link: https://vercel.com
+      description: 将服务器托管到vercel上部署，重要的是免费的吖(●ˇ∀ˇ●)
+      image: https://vercel.com/favicon.ico
+    - name: FlowerCloude
+      link: https://api-flowercloud.com/cart.php
+      description: 超稳的梯子，学习看视频等够用，但想要静态住宅IP的慎选！
+      image: https://api-flowercloud.com/favicon.ico
+    - name: CS自学指南
+      link: https://csdiy.wiki/
+      description: 自学计算机超棒的网站，都是各大高校教授 QAQ
+      image: /images/csdiy.png
+    - name: maven central repository
+      link: https://central.sonatype.com/
+      description: Java 生态中最核心、最权威的依赖仓库，全球绝大多数Java项目都从它下载maven依赖。
+      image: https://central.sonatype.com/favicon.ico
+    - name: SpringBootCodeGenerator
+      link: https://java.bejson.com/generator/
+      description: 支持 SQL 一键转 JAVA/JPA/Mybatis/MybatisPlus 等多种模板，轻松搞定 CRUD，彻底解放双手 ✋
+      image: https://www.jsonschema2pojo.org/favicon.ico
+    - name: Redefine Docs
+      link: https://redefine-docs.ohevan.com/
+      description: 一款优雅，高效，精致的 Hexo 主题简约，但不简单
+      image: /images/redefine.jpg
