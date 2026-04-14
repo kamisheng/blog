@@ -88,7 +88,7 @@ global:
   # Whether to enable Preloader.
   preloader:
     enable: true
-    custom_message: "kami's BLOG"
+    custom_message: "kami_Sheng's BLOG"
   side_tools:
     # Whether to enable gear rotation animation for settings button
     gear_rotation: true
@@ -208,15 +208,18 @@ navbar:
     Home: 
       path: / 
       icon: fa-regular fa-house # can be empty
+    Categories: #取名随意
+      icon: fa-solid fa-folder #图标
+      path: /categories/ #链接
     Archives: 
       path: /archives 
       icon: fa-regular fa-archive # can be empty
     Tags:
-      path: /tags
+      path: /tags/
       icon: fa-solid fa-tags
-    GitHub:
-      path: https://github.com/kamisheng
-      icon: fa-brands fa-github
+    Bookmarks: #取名随意
+      icon: fa-solid fa-bookmark #图标
+      path: /bookmarks/
     Links: 
       icon: fa-regular fa-link
       submenus:
@@ -315,7 +318,7 @@ articles:
     style: mac # mac | simple
     highlight_theme: # Color scheme for highlightjs code highlighting. For preview, see https://highlightjs.org/examples
       light: github # light mode theme, support: github, atom-one-light, default
-      dark: vs2015 # dark mode theme, support: github-dark, monokai-sublime, vs2015, night-owl, atom-one-dark, nord, tokyo-night-dark, a11y-dark, agate
+      dark: night-owl # dark mode theme, support: github-dark, monokai-sublime, vs2015, night-owl, atom-one-dark, nord, tokyo-night-dark, a11y-dark, agate
     font: # Custom font
       enable: false # Whether to enable
       family: # Font family
@@ -323,7 +326,7 @@ articles:
   # Table of contents settings
   toc:
     enable: true # Whether to enable TOC
-    max_depth: 3 # TOC depth
+    max_depth: 6 # TOC depth
     number: false # Whether to add number to TOC automatically
     expand: true # Whether to expand TOC
     init_open: true # Open toc by default
@@ -338,7 +341,7 @@ articles:
   # Article recommendation. Requires nodejieba (npm install nodejieba). Transplanted from hexo-theme-volantis.
   recommendation:
     # Whether to enable article recommendation
-    enable: false
+    enable: true
     # Article recommendation title
     title: 推荐阅读
     # Max number of articles to display
@@ -363,7 +366,7 @@ comment:
   config:
     # Waline comment system. See https://waline.js.org/
     waline:
-      serverUrl: https://example.example.com # Waline server URL. e.g. https://example.example.com
+      serverUrl: https://waline.kamisheng.xyz/ # Waline server URL. e.g. https://example.example.com
       lang: zh-CN # Waline language. e.g. zh-CN, en-US. See https://waline.js.org/guide/client/i18n.html
       emoji: [] # Waline emojis, see https://waline.js.org/guide/features/emoji.html
       recaptchaV3Key: # Google reCAPTCHA v3 key. See https://waline.js.org/reference/client/props.html#recaptchav3key
@@ -417,11 +420,11 @@ footer:
   # Icon in footer, write fontawesome icon code here
   icon: '<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>'
   # The start time of the website, format: YYYY/MM/DD HH:mm:ss
-  start: 2022/8/17 11:45:14
+  start: 2026/4/12 11:45:14
   # Site statistics
   statistics: true # show site statistics or not (total articles, total words)
   # Footer message
-  customize:
+  customize: "你说得对，但你知不知道每当鲸鱼排便的时候，它的屁股要张开很大，拉完之后久久不能闭合，非常痛苦！你不知道！你不在乎，你只关心你自己！"
   # ICP record number. See https://beian.miit.gov.cn/
   icp:
     enable: false # Whether to enable
@@ -483,6 +486,7 @@ plugins:
 page_templates:
   # Friend Links page column number
   friends_column: 2
+  bookmarks_column: 2
   # Tags page style
   tags_style: blur # blur, cloud
   # Masonry page batch size

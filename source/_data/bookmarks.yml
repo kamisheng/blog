@@ -1,0 +1,28 @@
+- category: 开发工具
+  icon: fa-code
+  items:
+    - name: VS Code
+      link: https://code.visualstudio.com
+      description: 微软出品的轻量级代码编辑器
+      image: https://code.visualstudio.com/favicon.ico
+    - name: Postman
+      link: https://www.postman.com
+      description: API 测试与调试工具
+      image: https://www.postman.com/favicon.ico
+    - name: Figma
+      link: https://www.figma.com
+      description: 团队协作的 UI 设计工具
+      image: https://www.figma.com/favicon.ico
+      
+- category: AI 助手
+  icon: fa-robot
+  items:
+    - name: ChatGPT
+      link: https://chat.openai.com
+      description: OpenAI 的 AI 对话助手，能写代码、回答问题
+      image: https://chat.openai.com/favicon.ico
+    - name: Claude
+      link: https://claude.ai
+      description: Anthropic 的 AI 助手，上下文超长
+      image: https://claude.ai/favicon.ico
+    
