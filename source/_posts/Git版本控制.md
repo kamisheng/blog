@@ -1,6 +1,7 @@
 ---
 title: Git版本控制
-date: 2026-04-14 15:00:51
+date: 2026-04-14 15:01:51
+updated: 2026-04-14 20:30:00 
 tags: Git版本控制
 categories: 技术工具         # 分类
 description: Git版本控制  # 描述
@@ -11,7 +12,7 @@ cover: /images/Git.jpg     # 封面图
 
 项目也需要一个合适的版本控制系统来使得更好地管理版本迭代，而Git正是因此而诞生的
 
-Git是如何工作的：
+Git是如何工作：
 
 ![点击查看源网页](https://oss.itbaima.cn/internal/markdown/2023/03/06/ZxY3MGkWRpOLVU6.jpg)
 
