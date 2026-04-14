@@ -32,7 +32,7 @@
     - name: MinGW-w64
       link: https://www.mingw-w64.org
       description: Windows 原生 C/C++ 编译环境
-      image: https://www.mingw-w64.org/favicon.ico
+      image: https://www.mingw-w64.org/logo.svg
     - name: GCC (WSL/Linux)
       link: https://gcc.gnu.org
       description: Linux/WSL 下的 C/C++ 编译环境
@@ -72,11 +72,11 @@
     - name: Kotlin
       link: https://kotlinlang.org
       description: 现代 JVM 语言，Android 官方支持
-      image: https://kotlinlang.org/favicon.ico
+      image: https://kotlinlang.org/assets/images/favicon.ico?v2
     - name: RabbitMQ
       link: https://www.rabbitmq.com
       description: 消息队列中间件
-      image: https://www.rabbitmq.com/favicon.ico
+      image: https://www.rabbitmq.com/img/rabbitmq-logo.svg
 - category: AI助手
   icon: fa-robot
   items:
@@ -95,7 +95,7 @@
     - name: Grok
       link: https://grok.com
       description: xAI 的 AI 助手，风格幽默
-      image: https://grok.com/images/favicon.svg
+      image: https://grok.com/images/favicon.ico
 
 - category: 常用工具
   icon: fa-tools
