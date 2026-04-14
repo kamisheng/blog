@@ -223,11 +223,18 @@ navbar:
     Links: 
       icon: fa-regular fa-link
       submenus:
-        About: /about
-        留言板: /comments
-        技能树: /skills
-        时间轴: /timeline
-        随机文章: /random
+        About: 
+          path: /about
+          icon: fa-regular fa-user
+        留言板: 
+          path: /comments
+          icon: fa-regular fa-comment
+        技能树: 
+          path: /skills
+          icon: fa-solid fa-code-branch
+        随机文章: 
+          path: /random
+          icon: fa-solid fa-shuffle
     # About: 
     #   icon: fa-regular fa-user
     #   submenus:
