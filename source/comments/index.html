@@ -1,0 +1,2279 @@
+---
+title: 留言板
+date: 2026-04-15 12:00:00
+comment: false
+---
+
+<style>
+:root {
+  --page-radius: 32px;
+  --panel-radius: 28px;
+  --wall-radius: 30px;
+  --card-radius: 18px;
+
+  --text-main: #000;
+  --text-soft: rgba(0,0,0,0.62);
+
+  --primary-grad: linear-gradient(135deg, #7c6cff 0%, #5d3fd3 45%, #38bdf8 100%);
+  --primary-glow: rgba(93,63,211,0.22);
+  --cyan-glow: rgba(56,189,248,0.18);
+
+  --shadow-xl: 0 18px 42px rgba(0,0,0,0.10);
+  --shadow-md: 0 12px 24px rgba(0,0,0,0.10);
+  --shadow-sm: 0 8px 18px rgba(0,0,0,0.08);
+
+  --neon-purple: rgba(124,108,255,0.24);
+  --neon-cyan: rgba(56,189,248,0.18);
+  --rare-gold: rgba(250,204,21,0.22);
+  --danger-red: rgba(220,38,38,0.18);
+  --ok-green: rgba(16,185,129,0.18);
+
+  --tech-panel:
+    linear-gradient(135deg, rgba(34,38,78,0.88), rgba(17,25,54,0.84) 52%, rgba(11,19,41,0.88));
+  --tech-panel-2:
+    linear-gradient(135deg, rgba(24,32,68,0.84), rgba(8,18,40,0.80) 52%, rgba(18,39,78,0.82));
+  --tech-input:
+    linear-gradient(135deg, rgba(18,26,58,0.90), rgba(10,19,42,0.88));
+  --tech-chip:
+    linear-gradient(135deg, rgba(31,40,86,0.88), rgba(14,24,52,0.84));
+  --tech-chip-active:
+    linear-gradient(135deg, rgba(124,108,255,0.90), rgba(56,189,248,0.88));
+  --tech-wall:
+    linear-gradient(180deg, rgba(12,20,44,0.84), rgba(9,15,34,0.78)),
+    linear-gradient(135deg, rgba(58,78,156,0.10), rgba(37,211,238,0.06));
+  --tech-line:
+    linear-gradient(120deg, rgba(124,108,255,0.78), rgba(56,189,248,0.54), rgba(255,255,255,0.10), rgba(124,108,255,0.66));
+}
+
+.comments-page[data-mode="night"] {
+  --text-main: #07111f;
+  --text-soft: rgba(7,17,31,0.68);
+
+  --primary-glow: rgba(99,102,241,0.30);
+  --cyan-glow: rgba(34,211,238,0.26);
+
+  --tech-panel:
+    linear-gradient(135deg, rgba(18,24,52,0.94), rgba(9,16,34,0.90) 52%, rgba(8,18,42,0.94));
+  --tech-panel-2:
+    linear-gradient(135deg, rgba(14,21,44,0.90), rgba(8,14,32,0.88) 52%, rgba(10,26,52,0.90));
+  --tech-input:
+    linear-gradient(135deg, rgba(13,20,44,0.94), rgba(7,15,33,0.92));
+  --tech-chip:
+    linear-gradient(135deg, rgba(24,31,68,0.92), rgba(10,18,41,0.90));
+  --tech-chip-active:
+    linear-gradient(135deg, rgba(99,102,241,0.94), rgba(34,211,238,0.90));
+  --tech-wall:
+    linear-gradient(180deg, rgba(8,12,26,0.90), rgba(10,14,30,0.86)),
+    linear-gradient(135deg, rgba(99,102,241,0.12), rgba(34,211,238,0.08));
+  --tech-line:
+    linear-gradient(120deg, rgba(99,102,241,0.82), rgba(34,211,238,0.58), rgba(255,255,255,0.08), rgba(99,102,241,0.72));
+}
+
+.comments-page {
+  position: relative;
+  margin: -2rem auto 0;
+  min-height: 100vh;
+  padding: 1.2rem 0 3rem;
+  overflow: hidden;
+  border-radius: var(--page-radius);
+  background: url('/images/comments-bg.jpg') center center / cover no-repeat fixed;
+}
+
+.comments-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--page-radius);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(124,108,255,0.10), transparent 18%),
+    radial-gradient(circle at 84% 18%, rgba(56,189,248,0.10), transparent 20%),
+    radial-gradient(circle at center,
+      rgba(255,255,255,0) 50%,
+      rgba(255,255,255,0.03) 68%,
+      rgba(255,255,255,0.10) 84%,
+      rgba(255,255,255,0.18) 100%
+    ),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08));
+  pointer-events: none;
+}
+
+.comments-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--page-radius);
+  background:
+    linear-gradient(90deg,
+      rgba(255,255,255,0.08),
+      transparent 14%,
+      transparent 86%,
+      rgba(255,255,255,0.08)
+    ),
+    linear-gradient(180deg,
+      rgba(255,255,255,0.10),
+      transparent 16%,
+      transparent 84%,
+      rgba(255,255,255,0.10)
+    );
+  pointer-events: none;
+}
+
+.comments-page[data-mode="night"]::before {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(99,102,241,0.14), transparent 22%),
+    radial-gradient(circle at 82% 22%, rgba(34,211,238,0.12), transparent 22%),
+    radial-gradient(circle at center,
+      rgba(10,18,38,0) 52%,
+      rgba(99,102,241,0.06) 70%,
+      rgba(34,211,238,0.08) 84%,
+      rgba(255,255,255,0.12) 100%
+    ),
+    linear-gradient(180deg, rgba(15,23,42,0.12), rgba(255,255,255,0.04));
+}
+
+.comments-page[data-mode="night"]::after {
+  background:
+    linear-gradient(90deg,
+      rgba(34,211,238,0.08),
+      transparent 14%,
+      transparent 86%,
+      rgba(99,102,241,0.10)
+    ),
+    linear-gradient(180deg,
+      rgba(99,102,241,0.10),
+      transparent 16%,
+      transparent 84%,
+      rgba(34,211,238,0.08)
+    );
+}
+
+.comments-page .page-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: var(--page-radius);
+  background: linear-gradient(
+    115deg,
+    rgba(255,255,255,0) 18%,
+    rgba(255,255,255,0.05) 28%,
+    rgba(255,255,255,0.00) 40%
+  );
+  transform: translateX(-40%);
+  animation: pageSheenMove 11s linear infinite;
+}
+
+.comments-shell {
+  position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* ---------- 顶部发送面板：科技能量站 ---------- */
+.composer-slot {
+  margin-bottom: 1rem;
+}
+
+.note-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: 120px 190px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 18px;
+  border-radius: var(--panel-radius);
+  overflow: hidden;
+  border: 1px solid rgba(124,108,255,0.22);
+  background: var(--tech-panel);
+  box-shadow:
+    0 22px 48px rgba(8,18,42,0.18),
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 0 34px rgba(93,63,211,0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.note-form:hover {
+  box-shadow:
+    0 26px 56px rgba(8,18,42,0.20),
+    0 0 0 1px rgba(255,255,255,0.08) inset,
+    0 0 42px rgba(56,189,248,0.14);
+}
+
+.note-form::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--panel-radius);
+  background: var(--tech-line);
+  background-size: 240% 240%;
+  opacity: 0.98;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  padding: 1px;
+  animation: formBorderFlow 8s linear infinite;
+}
+
+.note-form::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 22%, rgba(124,108,255,0.18), transparent 24%),
+    radial-gradient(circle at 84% 26%, rgba(56,189,248,0.14), transparent 26%),
+    linear-gradient(115deg, rgba(255,255,255,0) 20%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 46%);
+  background-size: auto, auto, 220% 100%;
+  background-repeat: no-repeat;
+  animation: formSheen 8s linear infinite;
+  pointer-events: none;
+}
+
+.note-form:focus-within {
+  transform: translateY(-1px);
+  box-shadow:
+    0 28px 60px rgba(7,16,36,0.22),
+    0 0 0 1px rgba(255,255,255,0.10) inset,
+    0 0 46px rgba(56,189,248,0.16);
+}
+
+.note-form:focus-within::before {
+  animation-duration: 3s;
+}
+
+.note-form.sent {
+  animation: formSentPulse 0.9s ease;
+}
+
+/* ---------- 输入框：深色能量槽 ---------- */
+.note-input,
+.note-textarea,
+.search-input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(124,108,255,0.18);
+  background: var(--tech-input);
+  color: #eef6ff !important;
+  outline: none;
+  font: inherit;
+  box-shadow:
+    0 8px 18px rgba(4,10,24,0.16),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.note-textarea {
+  padding: 11px 15px;
+  resize: none;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+.note-input::placeholder,
+.note-textarea::placeholder,
+.search-input::placeholder {
+  color: rgba(225,236,255,0.48) !important;
+}
+
+.note-input:hover,
+.note-textarea:hover,
+.search-input:hover {
+  border-color: rgba(56,189,248,0.22);
+  box-shadow:
+    0 10px 20px rgba(4,10,24,0.18),
+    0 0 0 1px rgba(255,255,255,0.06) inset;
+}
+
+.note-input:focus,
+.note-textarea:focus,
+.search-input:focus {
+  transform: translateY(-1px);
+  border-color: rgba(56,189,248,0.40);
+  box-shadow:
+    0 12px 22px rgba(8,20,46,0.24),
+    0 0 0 3px rgba(56,189,248,0.10),
+    0 0 28px rgba(56,189,248,0.12);
+}
+
+/* ---------- 发送按钮：能量胶囊 ---------- */
+.note-submit {
+  position: relative;
+  z-index: 1;
+  height: 48px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff !important;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, rgba(124,108,255,0.95), rgba(56,189,248,0.92));
+  box-shadow:
+    0 14px 28px rgba(93,63,211,0.28),
+    0 0 24px rgba(56,189,248,0.20);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  animation: submitGlow 3.2s ease-in-out infinite;
+}
+
+.note-submit::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -130%;
+  width: 70%;
+  height: 140%;
+  transform: rotate(18deg);
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.16) 30%,
+    rgba(255,255,255,0.78) 50%,
+    rgba(255,255,255,0.16) 70%,
+    rgba(255,255,255,0) 100%
+  );
+  filter: blur(2px);
+  animation: submitShine 3.6s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.note-submit::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.03));
+  pointer-events: none;
+}
+
+.note-submit:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: saturate(1.08);
+  box-shadow:
+    0 18px 34px rgba(93,63,211,0.34),
+    0 0 36px rgba(56,189,248,0.28);
+}
+
+.note-submit:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow:
+    0 10px 20px rgba(93,63,211,0.24),
+    0 0 16px rgba(56,189,248,0.16);
+}
+
+.note-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- 提示 ---------- */
+.note-form-tip {
+  margin-top: 0.65rem;
+  font-size: 0.88rem;
+  color: #dce8ff !important;
+  min-height: 1.4em;
+}
+
+.note-form-tip.is-ok {
+  color: #78ffd2 !important;
+  text-shadow: 0 0 14px rgba(16,185,129,0.18);
+}
+
+.note-form-tip.is-error {
+  color: #ff9aa8 !important;
+  text-shadow: 0 0 14px rgba(220,38,38,0.14);
+}
+
+/* ---------- 芯片按钮 ---------- */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.quick-btn,
+.count-chip,
+.mode-toggle,
+.sort-btn,
+.load-more-btn,
+.note-nav-btn {
+  position: relative;
+  border: 1px solid rgba(124,108,255,0.16);
+  border-radius: 999px;
+  color: #eaf4ff !important;
+  background: var(--tech-chip);
+  box-shadow:
+    0 8px 18px rgba(5,10,24,0.14),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.quick-btn::before,
+.mode-toggle::before,
+.sort-btn::before,
+.load-more-btn::before,
+.note-nav-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, rgba(124,108,255,0.28), rgba(56,189,248,0.20), rgba(255,255,255,0.04));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+.quick-btn {
+  padding: 0.5rem 0.88rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.8rem;
+  align-items: center;
+  margin: 0.95rem 0 0.95rem;
+}
+
+.toolbar-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.count-chip,
+.mode-toggle,
+.sort-btn {
+  padding: 0.62rem 0.96rem;
+  font: inherit;
+}
+
+.mode-toggle,
+.sort-btn,
+.load-more-btn,
+.note-nav-btn {
+  cursor: pointer;
+}
+
+.sort-group {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.mode-toggle:hover,
+.sort-btn:hover,
+.quick-btn:hover,
+.load-more-btn:hover,
+.note-nav-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(56,189,248,0.26);
+  box-shadow:
+    0 12px 24px rgba(4,10,24,0.20),
+    0 0 20px rgba(56,189,248,0.10);
+}
+
+.sort-btn.active {
+  color: #fff !important;
+  background: var(--tech-chip-active);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow:
+    0 14px 28px rgba(93,63,211,0.24),
+    0 0 24px rgba(56,189,248,0.18);
+}
+
+.search-input {
+  width: min(260px, 100%);
+}
+
+/* ---------- 留言墙：科技终端面板 ---------- */
+.notes-wall-wrap {
+  position: relative;
+  border-radius: var(--wall-radius);
+  padding: 1rem;
+  background: var(--tech-wall);
+  border: 1px solid rgba(124,108,255,0.14);
+  box-shadow:
+    0 22px 52px rgba(4,10,24,0.20),
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 0 36px rgba(124,108,255,0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.notes-wall-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(120deg, rgba(255,255,255,0) 18%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0) 42%);
+  background-size: 22px 22px, 22px 22px, 220% 100%;
+  animation: wallSheen 9s linear infinite;
+  opacity: 0.72;
+}
+
+.notes-wall-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    inset 0 0 38px rgba(56,189,248,0.06),
+    0 0 0 1px rgba(124,108,255,0.10);
+  z-index: 1;
+}
+
+.notes-wall {
+  position: relative;
+  z-index: 2;
+  column-count: 5;
+  column-gap: 18px;
+  min-height: 340px;
+  filter: blur(11px) saturate(0.85);
+  opacity: 0.92;
+  transition: filter 0.28s ease, opacity 0.28s ease;
+}
+
+.notes-wall-wrap:hover .notes-wall {
+  filter: blur(0);
+  opacity: 1;
+}
+
+.notes-wall.is-focus-mode .note {
+  opacity: 0.72;
+  filter: saturate(0.92) blur(0.2px);
+  transform: translate(calc(var(--tx) + var(--dx, 0px)), calc(var(--ty) + var(--dy, 0px))) rotate(var(--r)) scale(0.985);
+}
+
+.notes-wall.is-focus-mode .note.hover-focus {
+  opacity: 1;
+  filter: none;
+  transform: translate(calc(var(--tx) + var(--dx, 0px)), calc(var(--ty) + var(--dy, 0px) - 8px)) rotate(var(--r)) scale(1.03);
+  z-index: 7;
+}
+
+/* ---------- 中间提示 ---------- */
+.wall-cover-tip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1rem 1.5rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: transparent !important;
+  background: linear-gradient(90deg, rgba(18,26,58,0.76), rgba(10,18,40,0.70));
+  border: 1px solid rgba(124,108,255,0.24);
+  box-shadow:
+    0 18px 36px rgba(4,10,24,0.22),
+    0 0 26px rgba(124,108,255,0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  white-space: nowrap;
+  animation: tipBreath 3.6s ease-in-out infinite, tipFloat 4.6s ease-in-out infinite;
+  z-index: 3;
+}
+
+.wall-cover-tip .tip-front,
+.wall-cover-tip .tip-back {
+  display: block;
+  background: linear-gradient(90deg, #8d7dff, #6ee7ff, #b6f7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+.wall-cover-tip .tip-back {
+  position: absolute;
+  inset: 0;
+  filter: blur(14px);
+  opacity: 0.46;
+  transform: scale(1.02);
+}
+
+.notes-wall-wrap:hover .wall-cover-tip {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 8px));
+  animation: none;
+}
+
+/* ---------- 便利贴保持纸张风格 ---------- */
+.note {
+  --r: 0deg;
+  --tx: 0px;
+  --ty: 0px;
+  --dx: 0px;
+  --dy: 0px;
+  --float-dur: 4.6s;
+  --float-delay: 0s;
+  --enter-delay: 0ms;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 1rem 0.95rem 0.95rem;
+  border-radius: 10px 10px 18px 12px;
+  border: 1px solid rgba(255,255,255,0.26);
+  box-shadow:
+    0 12px 24px rgba(0,0,0,0.10),
+    0 2px 0 rgba(255,255,255,0.32) inset,
+    0 0 16px rgba(255,255,255,0.10);
+  transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy))) rotate(var(--r));
+  cursor: pointer;
+  overflow: hidden;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  animation: noteFloat var(--float-dur) ease-in-out infinite var(--float-delay);
+  transition: box-shadow 0.18s ease, filter 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
+}
+
+.note.enter {
+  animation:
+    noteEnter 0.55s cubic-bezier(.2,.75,.2,1) both var(--enter-delay),
+    noteFloat var(--float-dur) ease-in-out infinite calc(var(--float-delay) + 0.2s);
+}
+
+.note::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.22), transparent 42%),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,0.02) 0px,
+      rgba(255,255,255,0.02) 2px,
+      rgba(0,0,0,0.012) 3px,
+      rgba(0,0,0,0.012) 4px
+    );
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.note:hover {
+  animation: none;
+  transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy) - 7px)) rotate(var(--r)) scale(1.024);
+  box-shadow:
+    0 20px 34px rgba(0,0,0,0.15),
+    0 2px 0 rgba(255,255,255,0.35) inset,
+    0 0 0 1px rgba(124,108,255,0.24),
+    0 0 28px rgba(124,108,255,0.22),
+    0 0 42px rgba(56,189,248,0.14);
+  filter: saturate(1.05);
+  z-index: 4;
+}
+
+.note.search-hit {
+  box-shadow:
+    0 18px 32px rgba(0,0,0,0.13),
+    0 2px 0 rgba(255,255,255,0.35) inset,
+    0 0 0 2px rgba(124,108,255,0.22),
+    0 0 34px rgba(56,189,248,0.16);
+}
+
+.note::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: var(--tape-left, 50%);
+  width: 52px;
+  height: 14px;
+  transform: translateX(-50%) rotate(var(--tape-r, -2deg));
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.48));
+  box-shadow:
+    0 2px 0 rgba(0,0,0,0.05),
+    0 0 0 1px rgba(255,255,255,0.28) inset;
+}
+
+.note-decoration {
+  position: absolute;
+  z-index: 2;
+}
+
+.note-decoration.tape {
+  top: 11px;
+  left: 16px;
+  width: 40px;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,255,255,0.54));
+  border: 1px solid rgba(255,255,255,0.34);
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.08),
+    0 0 0 1px rgba(255,255,255,0.20) inset;
+  transform: rotate(-12deg);
+}
+
+.note-decoration.pin {
+  top: 11px;
+  right: 14px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff2, transparent 34%), linear-gradient(135deg, #ef4444, #f97316);
+  border: 1px solid rgba(255,255,255,0.30);
+  box-shadow:
+    0 3px 7px rgba(0,0,0,0.22),
+    0 0 0 1px rgba(255,255,255,0.18) inset;
+}
+
+.note-decoration.corner {
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.24));
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  box-shadow: -2px 2px 4px rgba(0,0,0,0.04);
+}
+
+.note.size-s { min-height: 140px; }
+.note.size-m { min-height: 190px; }
+.note.size-l { min-height: 245px; }
+
+.note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.4rem;
+}
+
+.note-author {
+  margin-top: 0.8rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #000 !important;
+  letter-spacing: 0.01em;
+}
+
+.note-time {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--text-soft) !important;
+}
+
+.note-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  padding: 0.18rem 0.48rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-main) !important;
+  background: rgba(255,255,255,0.46);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+.note-content {
+  margin-top: 0.78rem;
+  font-size: 1.08rem;
+  line-height: 1.95;
+  font-weight: 600;
+  color: #000 !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  text-shadow: none !important;
+}
+
+.note-content,
+.note-content * {
+  color: #000 !important;
+}
+
+.note-content p {
+  margin: 0 0 0.56rem;
+}
+
+.note-content p:last-child {
+  margin-bottom: 0;
+}
+
+.note-content img.wl-emoji,
+.note-content img.vemoji,
+.note-content img.emoji {
+  width: 1.35em;
+  height: 1.35em;
+  max-width: 1.35em;
+  vertical-align: -0.25em;
+  display: inline-block;
+}
+
+.note-content img.note-image,
+.note-content img:not(.wl-emoji):not(.vemoji):not(.emoji) {
+  width: 100%;
+  max-width: 100%;
+  max-height: 168px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  display: block;
+  margin-top: 0.52rem;
+  border: 1px solid rgba(255,255,255,0.28);
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.10),
+    0 0 0 1px rgba(255,255,255,0.12) inset;
+  cursor: zoom-in;
+}
+
+.note.c1 { background: linear-gradient(180deg, #fff6b5, #ffe986); }
+.note.c2 { background: linear-gradient(180deg, #ffe3ef, #ffc9dd); }
+.note.c3 { background: linear-gradient(180deg, #ddf0ff, #c5e4ff); }
+.note.c4 { background: linear-gradient(180deg, #e3ffe1, #c9f7c7); }
+.note.c5 { background: linear-gradient(180deg, #f8e7ff, #eed0ff); }
+.note.c6 { background: linear-gradient(180deg, #ffeccc, #ffd9a8); }
+
+.note-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.24rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fff !important;
+  background: var(--primary-grad);
+  box-shadow: 0 8px 18px rgba(93,63,211,0.18);
+}
+
+.note.note-admin {
+  border-color: rgba(99,102,241,0.24);
+  box-shadow:
+    0 14px 28px rgba(0,0,0,0.12),
+    0 2px 0 rgba(255,255,255,0.35) inset,
+    0 0 0 1px rgba(99,102,241,0.22),
+    0 0 28px rgba(99,102,241,0.16);
+}
+
+.note.note-rare {
+  border-color: rgba(250,204,21,0.30);
+  box-shadow:
+    0 14px 28px rgba(0,0,0,0.12),
+    0 2px 0 rgba(255,255,255,0.35) inset,
+    0 0 0 1px rgba(250,204,21,0.28),
+    0 0 36px rgba(250,204,21,0.20);
+}
+
+.note.note-new {
+  box-shadow:
+    0 14px 28px rgba(0,0,0,0.12),
+    0 2px 0 rgba(255,255,255,0.35) inset,
+    0 0 0 2px rgba(124,108,255,0.18),
+    0 0 30px rgba(124,108,255,0.20);
+  animation:
+    newNotePulse 2.8s ease 1,
+    noteEnter 0.55s cubic-bezier(.2,.75,.2,1) both var(--enter-delay),
+    noteFloat var(--float-dur) ease-in-out infinite calc(var(--float-delay) + 0.2s);
+}
+
+.load-more-wrap {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.load-more-btn {
+  padding: 0.72rem 1.25rem;
+  font: inherit;
+}
+
+.auto-load-sentinel {
+  width: 100%;
+  height: 20px;
+}
+
+/* ---------- 弹窗 ---------- */
+.note-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  background:
+    radial-gradient(circle at center, rgba(124,108,255,0.08), transparent 42%),
+    rgba(10, 10, 16, 0.34);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.note-modal.show {
+  display: block;
+}
+
+.note-modal-card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: min(560px, calc(100vw - 24px));
+  min-height: 240px;
+  max-height: min(78vh, 720px);
+  overflow: auto;
+  border-radius: 20px;
+  padding: 1.25rem 1.2rem 1.1rem;
+  box-shadow:
+    0 24px 56px rgba(0,0,0,0.20),
+    0 0 34px rgba(124,108,255,0.12),
+    inset 0 0 0 1px rgba(255,255,255,0.18);
+  z-index: 10000;
+  opacity: 1;
+}
+
+.note-modal-card.c1 { background: linear-gradient(180deg, #fff6b5, #ffe986); }
+.note-modal-card.c2 { background: linear-gradient(180deg, #ffe3ef, #ffc9dd); }
+.note-modal-card.c3 { background: linear-gradient(180deg, #ddf0ff, #c5e4ff); }
+.note-modal-card.c4 { background: linear-gradient(180deg, #e3ffe1, #c9f7c7); }
+.note-modal-card.c5 { background: linear-gradient(180deg, #f8e7ff, #eed0ff); }
+.note-modal-card.c6 { background: linear-gradient(180deg, #ffeccc, #ffd9a8); }
+
+.note-modal-card.switch-out-left {
+  animation: modalSwitchOutLeft 0.18s ease forwards;
+}
+
+.note-modal-card.switch-in-left {
+  animation: modalSwitchInLeft 0.22s ease forwards;
+}
+
+.note-modal-card.switch-out-right {
+  animation: modalSwitchOutRight 0.18s ease forwards;
+}
+
+.note-modal-card.switch-in-right {
+  animation: modalSwitchInRight 0.22s ease forwards;
+}
+
+.note-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  font-size: 1rem;
+}
+
+.note-modal-author {
+  margin: 0.7rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #000 !important;
+}
+
+.note-modal-time {
+  margin-top: 0.3rem;
+  font-size: 0.84rem;
+  color: var(--text-soft) !important;
+}
+
+.note-modal-content {
+  margin-top: 1rem;
+  line-height: 2;
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #000 !important;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.note-modal-content,
+.note-modal-content * {
+  color: #000 !important;
+}
+
+.note-modal-content p {
+  margin: 0 0 0.7rem;
+}
+
+.note-modal-content p:last-child {
+  margin-bottom: 0;
+}
+
+.note-modal-content img.wl-emoji,
+.note-modal-content img.vemoji,
+.note-modal-content img.emoji {
+  width: 1.55em;
+  height: 1.55em;
+  max-width: 1.55em;
+  vertical-align: -0.28em;
+  display: inline-block;
+}
+
+.note-modal-content img.note-image,
+.note-modal-content img:not(.wl-emoji):not(.vemoji):not(.emoji) {
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 12px;
+  display: block;
+  margin-top: 0.7rem;
+  border: 1px solid rgba(255,255,255,0.30);
+  box-shadow:
+    0 12px 24px rgba(0,0,0,0.12),
+    0 0 0 1px rgba(255,255,255,0.14) inset;
+}
+
+.note-modal-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.note-nav-btn {
+  padding: 0.6rem 1rem;
+}
+
+.note-nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wall-empty {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  color: #dfe9ff !important;
+  font-size: 0.95rem;
+}
+
+/* 只隐藏主题注入评论区 */
+#waline,
+.comment-container,
+.comment-wrap,
+.comment-area,
+.comment-box,
+.post-comment,
+.post-comments,
+.comment-title,
+.comments-title,
+#comments,
+.comment,
+.comment-block,
+.comments {
+  display: none !important;
+}
+
+/* ---------- 动画 ---------- */
+@keyframes formBorderFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 240% 50%; }
+}
+
+@keyframes formSentPulse {
+  0% {
+    box-shadow:
+      0 18px 42px rgba(8,18,42,0.18),
+      0 0 0 1px rgba(255,255,255,0.06) inset,
+      0 0 30px rgba(93,63,211,0.12);
+  }
+  50% {
+    box-shadow:
+      0 28px 58px rgba(8,18,42,0.22),
+      0 0 0 1px rgba(255,255,255,0.08) inset,
+      0 0 44px rgba(56,189,248,0.20);
+  }
+  100% {
+    box-shadow:
+      0 18px 42px rgba(8,18,42,0.18),
+      0 0 0 1px rgba(255,255,255,0.06) inset,
+      0 0 30px rgba(93,63,211,0.12);
+  }
+}
+
+@keyframes submitShine {
+  0% { left: -130%; }
+  100% { left: 150%; }
+}
+
+@keyframes submitGlow {
+  0%, 100% {
+    box-shadow:
+      0 14px 28px rgba(93,63,211,0.26),
+      0 0 20px rgba(56,189,248,0.14);
+  }
+  50% {
+    box-shadow:
+      0 18px 34px rgba(93,63,211,0.34),
+      0 0 30px rgba(56,189,248,0.24);
+  }
+}
+
+@keyframes tipBreath {
+  0%, 100% {
+    box-shadow:
+      0 18px 36px rgba(4,10,24,0.18),
+      0 0 18px rgba(124,108,255,0.10);
+    opacity: 0.92;
+  }
+  50% {
+    box-shadow:
+      0 22px 42px rgba(4,10,24,0.22),
+      0 0 34px rgba(56,189,248,0.18);
+    opacity: 1;
+  }
+}
+
+@keyframes tipFloat {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, calc(-50% - 6px)); }
+}
+
+@keyframes noteEnter {
+  from {
+    opacity: 0;
+    transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy) - 30px)) rotate(calc(var(--r) - 6deg)) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy))) rotate(var(--r)) scale(1);
+  }
+}
+
+@keyframes noteFloat {
+  0%, 100% {
+    transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy))) rotate(var(--r));
+  }
+  50% {
+    transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy) - 6px)) rotate(calc(var(--r) + 0.5deg));
+  }
+}
+
+@keyframes newNotePulse {
+  0% {
+    box-shadow:
+      0 14px 28px rgba(0,0,0,0.12),
+      0 2px 0 rgba(255,255,255,0.35) inset,
+      0 0 0 0 rgba(124,108,255,0.22),
+      0 0 0 rgba(124,108,255,0.16);
+  }
+  45% {
+    box-shadow:
+      0 18px 34px rgba(0,0,0,0.14),
+      0 2px 0 rgba(255,255,255,0.35) inset,
+      0 0 0 8px rgba(124,108,255,0.08),
+      0 0 28px rgba(124,108,255,0.24);
+  }
+  100% {
+    box-shadow:
+      0 14px 28px rgba(0,0,0,0.12),
+      0 2px 0 rgba(255,255,255,0.35) inset,
+      0 0 0 0 rgba(124,108,255,0),
+      0 0 0 rgba(124,108,255,0);
+  }
+}
+
+@keyframes pageSheenMove {
+  0% { transform: translateX(-40%); opacity: 0; }
+  10% { opacity: 1; }
+  55% { opacity: 1; }
+  100% { transform: translateX(38%); opacity: 0; }
+}
+
+@keyframes formSheen {
+  0% { background-position: 0 0, 0 0, 160% 0; }
+  100% { background-position: 0 0, 0 0, -40% 0; }
+}
+
+@keyframes wallSheen {
+  0% { background-position: 0 0, 0 0, 180% 0; }
+  100% { background-position: 0 0, 0 0, -30% 0; }
+}
+
+@keyframes modalSwitchOutLeft {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% - 26px), -50%) scale(0.98); }
+}
+
+@keyframes modalSwitchInLeft {
+  0% { opacity: 0; transform: translate(calc(-50% + 26px), -50%) scale(0.98); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes modalSwitchOutRight {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + 26px), -50%) scale(0.98); }
+}
+
+@keyframes modalSwitchInRight {
+  0% { opacity: 0; transform: translate(calc(-50% - 26px), -50%) scale(0.98); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note,
+  .note-submit,
+  .note-submit::before,
+  .wall-cover-tip,
+  .note-form::before,
+  .note-form::after,
+  .comments-page .page-sheen,
+  .notes-wall-wrap::before,
+  .note-modal-card.switch-out-left,
+  .note-modal-card.switch-out-right,
+  .note-modal-card.switch-in-left,
+  .note-modal-card.switch-in-right {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 1080px) {
+  .notes-wall { column-count: 4; }
+}
+
+@media (max-width: 900px) {
+  .note-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .note-form .note-textarea {
+    grid-column: 1 / 3;
+  }
+
+  .note-form .note-submit {
+    grid-column: 1 / 3;
+    justify-self: end;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 840px) {
+  .notes-wall { column-count: 3; }
+}
+
+@media (max-width: 640px) {
+  .notes-wall {
+    column-count: 2;
+    column-gap: 12px;
+  }
+
+  .note {
+    margin-bottom: 12px;
+  }
+
+  .wall-cover-tip {
+    width: calc(100% - 32px);
+    text-align: center;
+    white-space: normal;
+  }
+
+  .toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .note-content img.note-image,
+  .note-content img:not(.wl-emoji):not(.vemoji):not(.emoji) {
+    max-height: 150px;
+  }
+}
+
+@media (max-width: 420px) {
+  .notes-wall { column-count: 1; }
+
+  .note-form {
+    grid-template-columns: 1fr;
+  }
+
+  .note-form .note-textarea,
+  .note-form .note-submit {
+    grid-column: auto;
+  }
+
+  .note-form .note-submit {
+    justify-self: stretch;
+  }
+
+  .quick-actions {
+    gap: 0.45rem;
+  }
+}
+</style>
+
+<div class="comments-page" id="commentsPage" data-mode="day">
+  <div class="page-sheen"></div>
+
+  <div class="comments-shell">
+    <div class="composer-slot">
+      <form class="note-form" id="noteForm" action="javascript:void(0);" onsubmit="return false;" novalidate>
+        <input class="note-input" id="noteNick" type="text" placeholder="昵称" maxlength="32" required>
+        <input class="note-input" id="noteMail" type="email" placeholder="邮箱（可选）" maxlength="120">
+        <textarea class="note-textarea" id="noteComment" placeholder="把想说的话贴在这里..." maxlength="1000" required></textarea>
+        <button class="note-submit" id="noteSubmit" type="button">贴上去</button>
+      </form>
+      <div class="note-form-tip" id="noteFormTip"></div>
+      <div class="quick-actions" id="quickActions">
+        <button class="quick-btn" type="button" data-fill="路过打卡一下 ✨">路过打卡</button>
+        <button class="quick-btn" type="button" data-fill="留下一个爪印 (๑•̀ㅂ•́)و✧">留下爪印</button>
+        <button class="quick-btn" type="button" data-fill="博客做得很酷，支持一下！">夸夸博主</button>
+        <button class="quick-btn" type="button" data-fill="来都来了，留句话再走。">来都来了</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="count-chip" id="countChip">已贴 0 张便利贴</div>
+        <input class="search-input" id="searchInput" type="text" placeholder="搜索昵称 / 留言内容">
+        <div class="sort-group" id="sortGroup">
+          <button class="sort-btn active" type="button" data-sort="latest">最新</button>
+          <button class="sort-btn" type="button" data-sort="hottest">最热</button>
+          <button class="sort-btn" type="button" data-sort="random">随机看看</button>
+        </div>
+      </div>
+      <button class="mode-toggle" id="modeToggle" type="button">夜间氛围</button>
+    </div>
+
+    <section class="notes-wall-wrap" id="wallWrap">
+      <div class="notes-wall" id="notesWall">
+        <div class="wall-empty">正在加载留言墙...</div>
+      </div>
+      <div class="wall-cover-tip">
+        <span class="tip-back">终于等到你了...</span>
+        <span class="tip-front">终于等到你了...</span>
+      </div>
+    </section>
+
+    <div class="load-more-wrap">
+      <button class="load-more-btn" id="loadMoreBtn" style="display:none;">加载更多</button>
+    </div>
+    <div class="auto-load-sentinel" id="autoLoadSentinel"></div>
+  </div>
+</div>
+
+<div class="note-modal" id="noteModal">
+  <div class="note-modal-card" id="noteModalCard">
+    <button class="note-modal-close" id="noteModalClose">✕</button>
+    <div class="note-modal-author" id="noteModalAuthor"></div>
+    <div class="note-modal-time" id="noteModalTime"></div>
+    <div class="note-modal-content" id="noteModalContent"></div>
+    <div class="note-modal-nav">
+      <button class="note-nav-btn" id="notePrev">上一张</button>
+      <button class="note-nav-btn" id="noteNext">下一张</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SERVER_URL = 'https://waline.kamisheng.xyz';
+  var INITIAL_VISIBLE = 30;
+  var LOAD_MORE_STEP = 20;
+  var NEW_NOTE_KEY = 'kami_comments_last_submitted_stable_v2';
+  var DRAFT_KEY = 'kami_comments_draft_stable_v2';
+  var MODE_KEY = 'kami_comments_mode_stable_v2';
+
+  var RAW_PATH = window.location.pathname;
+  var CANONICAL_PATH = RAW_PATH.replace(/index\.html$/, '').replace(/\/?$/, '/') || '/';
+
+  var PATHS = [];
+  [CANONICAL_PATH, CANONICAL_PATH.replace(/\/$/, ''), CANONICAL_PATH + 'index.html'].forEach(function (p) {
+    if (PATHS.indexOf(p) === -1) PATHS.push(p);
+  });
+
+  var commentsPage = document.getElementById('commentsPage');
+  var wallWrap = document.getElementById('wallWrap');
+  var wall = document.getElementById('notesWall');
+  var modal = document.getElementById('noteModal');
+  var modalCard = document.getElementById('noteModalCard');
+  var modalAuthor = document.getElementById('noteModalAuthor');
+  var modalTime = document.getElementById('noteModalTime');
+  var modalContent = document.getElementById('noteModalContent');
+  var modalClose = document.getElementById('noteModalClose');
+  var modalPrev = document.getElementById('notePrev');
+  var modalNext = document.getElementById('noteNext');
+  var loadMoreBtn = document.getElementById('loadMoreBtn');
+  var countChip = document.getElementById('countChip');
+  var searchInput = document.getElementById('searchInput');
+  var sortGroup = document.getElementById('sortGroup');
+  var modeToggle = document.getElementById('modeToggle');
+  var quickActions = document.getElementById('quickActions');
+  var autoLoadSentinel = document.getElementById('autoLoadSentinel');
+
+  var noteForm = document.getElementById('noteForm');
+  var noteNick = document.getElementById('noteNick');
+  var noteMail = document.getElementById('noteMail');
+  var noteComment = document.getElementById('noteComment');
+  var noteSubmit = document.getElementById('noteSubmit');
+  var noteFormTip = document.getElementById('noteFormTip');
+
+  var colors = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
+  var rotations = [-4, -2, -1, 1, 2, 4];
+  var txs = [-12, -7, -3, 4, 8, 13];
+  var tys = [0, 8, 14, 22, 30];
+  var tapeLefts = ['43%', '47%', '50%', '54%', '58%'];
+  var tapeRots = ['-5deg', '-2deg', '1deg', '3deg'];
+  var sizes = ['size-s', 'size-m', 'size-l'];
+  var floatDurations = [4.1, 4.8, 5.3, 5.9];
+  var floatDelays = [-1.2, -0.8, -2, -1.5, -0.3];
+  var decorationTypes = ['tape', 'pin', 'corner'];
+
+  var notesData = [];
+  var filteredNotes = [];
+  var currentIndex = 0;
+  var visibleCount = INITIAL_VISIBLE;
+  var sortMode = 'latest';
+  var randomSeed = Date.now();
+  var lastAnchorRect = null;
+  var modalOpen = false;
+  var modalSwitching = false;
+
+  function removeThemeWaline() {
+    [
+      '#waline',
+      '.comment-container',
+      '.comment-wrap',
+      '.comment-area',
+      '.comment-box',
+      '.post-comment',
+      '.post-comments',
+      '.comment-title',
+      '.comments-title',
+      '#comments',
+      '.comment',
+      '.comment-block',
+      '.comments'
+    ].forEach(function (selector) {
+      var list = document.querySelectorAll(selector);
+      list.forEach(function (el) { el.remove(); });
+    });
+
+    document.querySelectorAll('script').forEach(function (s) {
+      var txt = s.textContent || '';
+      var src = s.getAttribute('src') || '';
+      if (src.indexOf('/js/libs/waline.js') !== -1 || txt.indexOf("el: '#waline'") !== -1 || txt.indexOf('redefineWalineInstance') !== -1) {
+        s.remove();
+      }
+    });
+
+    document.querySelectorAll('h1,h2,h3,h4,div,span,p').forEach(function (el) {
+      var text = (el.textContent || '').trim();
+      if (/^(评论|Comments?)$/.test(text) || /Powered by Waline/i.test(text)) {
+        el.remove();
+      }
+    });
+  }
+
+  function startWalineRemovalGuard() {
+    removeThemeWaline();
+    var observer = new MutationObserver(function () {
+      removeThemeWaline();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('load', removeThemeWaline);
+    setTimeout(removeThemeWaline, 300);
+    setTimeout(removeThemeWaline, 1000);
+    setTimeout(removeThemeWaline, 2500);
+    setTimeout(removeThemeWaline, 5000);
+  }
+
+  function saveDraft() {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        nick: noteNick.value,
+        mail: noteMail.value,
+        comment: noteComment.value
+      }));
+    } catch (e) {}
+  }
+
+  function loadDraft() {
+    try {
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      var draft = JSON.parse(raw);
+      if (draft.nick) noteNick.value = draft.nick;
+      if (draft.mail) noteMail.value = draft.mail;
+      if (draft.comment) noteComment.value = draft.comment;
+    } catch (e) {}
+  }
+
+  function clearDraft() {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch (e) {}
+  }
+
+  function autoResizeTextarea(el) {
+    el.style.height = '48px';
+    var h = Math.min(Math.max(el.scrollHeight, 48), 120);
+    el.style.height = h + 'px';
+  }
+
+  function escapeHTML(str) {
+    str = str || '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function stripHTML(html) {
+    var div = document.createElement('div');
+    div.innerHTML = html || '';
+    return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function normalizeText(text) {
+    return String(text || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function renderCommentHTML(html) {
+    var div = document.createElement('div');
+    div.innerHTML = html || '';
+
+    div.querySelectorAll('img').forEach(function (img) {
+      img.classList.add('note-image');
+      img.setAttribute('loading', 'lazy');
+      img.setAttribute('decoding', 'async');
+    });
+
+    div.querySelectorAll('a').forEach(function (a) {
+      var href = a.getAttribute('href') || '';
+      var isImage = /\.(png|jpe?g|gif|webp|avif|svg)(\?.*)?$/i.test(href);
+      if (isImage && !a.querySelector('img')) {
+        var img = document.createElement('img');
+        img.src = href;
+        img.alt = 'image';
+        img.className = 'note-image';
+        img.setAttribute('loading', 'lazy');
+        img.setAttribute('decoding', 'async');
+        a.replaceWith(img);
+      }
+    });
+
+    return div.innerHTML;
+  }
+
+  function formatTime(value) {
+    if (!value) return '';
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return value;
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function isAdmin(item) {
+    var nick = String((item && item.nick) || '').toLowerCase();
+    return /kami|kamisheng/.test(nick);
+  }
+
+  function hashString(str) {
+    str = str || '';
+    var h = 0;
+    for (var i = 0; i < str.length; i += 1) {
+      h = ((h << 5) - h) + str.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h);
+  }
+
+  function hottestScore(item) {
+    return Number((item && item.like) || 0) * 5 +
+      Number((item && item.childrenCount) || 0) * 3 +
+      Math.min(stripHTML((item && item.comment) || '').length / 80, 2);
+  }
+
+  function flattenComments(list, result, depth, parentNick) {
+    list = list || [];
+    result = result || [];
+    depth = depth || 0;
+    parentNick = parentNick || '';
+
+    list.forEach(function (item) {
+      var cloned = {};
+      for (var k in item) cloned[k] = item[k];
+      cloned.depth = depth;
+      cloned.parentNick = parentNick;
+      cloned.childrenCount = Array.isArray(item.children) ? item.children.length : 0;
+      result.push(cloned);
+
+      if (Array.isArray(item.children) && item.children.length) {
+        flattenComments(item.children, result, depth + 1, item.nick || parentNick);
+      }
+    });
+    return result;
+  }
+
+  function extractList(json) {
+    if (json && Array.isArray(json.data)) return json.data;
+    if (json && json.data && Array.isArray(json.data.data)) return json.data.data;
+    if (json && Array.isArray(json.comments)) return json.comments;
+    if (json && Array.isArray(json.list)) return json.list;
+    return [];
+  }
+
+  function fetchCommentsByPath(path, page, pageSize) {
+    page = page || 1;
+    pageSize = pageSize || 100;
+    var url = SERVER_URL + '/api/comment?path=' + encodeURIComponent(path) + '&page=' + page + '&pageSize=' + pageSize;
+
+    return fetch(url)
+      .then(function (res) { return res.json(); })
+      .then(function (json) {
+        return flattenComments(extractList(json));
+      });
+  }
+
+  function loadComments() {
+    var merged = new Map();
+    var chain = Promise.resolve();
+
+    PATHS.forEach(function (path) {
+      chain = chain.then(function () {
+        var page = 1;
+
+        function loop() {
+          if (page > 5) return Promise.resolve();
+
+          return fetchCommentsByPath(path, page, 100)
+            .then(function (list) {
+              if (!list.length) return;
+
+              list.forEach(function (item) {
+                var key = item.objectId != null ? item.objectId : (item.nick + '-' + item.time + '-' + item.comment);
+                if (!merged.has(key)) merged.set(key, item);
+              });
+
+              if (list.length < 100) return;
+              page += 1;
+              return loop();
+            })
+            .catch(function (err) {
+              console.error('fetch path failed:', path, err);
+            });
+        }
+
+        return loop();
+      });
+    });
+
+    return chain.then(function () {
+      return Array.from(merged.values());
+    });
+  }
+
+  function getLastSubmitted() {
+    try {
+      var raw = localStorage.getItem(NEW_NOTE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearLastSubmitted() {
+    try {
+      localStorage.removeItem(NEW_NOTE_KEY);
+    } catch (e) {}
+  }
+
+  function updateCountChip() {
+    if (!filteredNotes.length && !notesData.length) {
+      countChip.textContent = '还没有便利贴';
+      return;
+    }
+    if (filteredNotes.length === notesData.length) {
+      countChip.textContent = '已贴 ' + notesData.length + ' 张便利贴';
+    } else {
+      countChip.textContent = '筛到 ' + filteredNotes.length + ' / ' + notesData.length + ' 张';
+    }
+  }
+
+  function updateLoadMore() {
+    if (filteredNotes.length > visibleCount) {
+      loadMoreBtn.style.display = 'inline-flex';
+      loadMoreBtn.textContent = '加载更多（剩余 ' + (filteredNotes.length - visibleCount) + '）';
+    } else {
+      loadMoreBtn.style.display = 'none';
+    }
+  }
+
+  function makeDecoration(hash) {
+    return decorationTypes[hash % decorationTypes.length];
+  }
+
+  function applyFiltersAndSort() {
+    var query = normalizeText(searchInput.value.toLowerCase());
+    var arr = notesData.slice();
+
+    if (query) {
+      arr = arr.filter(function (item) {
+        var nick = normalizeText(String((item && item.nick) || '').toLowerCase());
+        var text = normalizeText(stripHTML((item && item.comment) || '').toLowerCase());
+        return nick.indexOf(query) !== -1 || text.indexOf(query) !== -1;
+      });
+    }
+
+    if (sortMode === 'latest') {
+      arr.sort(function (a, b) { return (b.time || 0) - (a.time || 0); });
+    } else if (sortMode === 'hottest') {
+      arr.sort(function (a, b) { return hottestScore(b) - hottestScore(a); });
+    } else if (sortMode === 'random') {
+      arr.sort(function (a, b) {
+        var ha = hashString(((a.objectId || a.comment || '') + randomSeed));
+        var hb = hashString(((b.objectId || b.comment || '') + randomSeed));
+        return ha - hb;
+      });
+    }
+
+    filteredNotes = arr;
+    updateCountChip();
+    renderWall(filteredNotes);
+  }
+
+  function renderWall(list) {
+    if (!list.length) {
+      wall.innerHTML = '<div class="wall-empty">还没有留言，来留下第一张便利贴吧 ✨</div>';
+      loadMoreBtn.style.display = 'none';
+      return;
+    }
+
+    wall.innerHTML = '';
+    wall.classList.remove('is-focus-mode');
+
+    var visible = list.slice(0, visibleCount);
+    var lastSubmitted = getLastSubmitted();
+    var matchedNew = false;
+    var hasSearch = normalizeText(searchInput.value).length > 0;
+
+    visible.forEach(function (item, index) {
+      var stableKey = String(item.objectId || (item.nick + '-' + item.time + '-' + item.comment));
+      var hash = hashString(stableKey);
+      var colorClass = colors[index % colors.length];
+      var sizeClass = sizes[index % sizes.length];
+      var rotate = rotations[index % rotations.length];
+      var tx = txs[index % txs.length];
+      var ty = tys[index % tys.length];
+      var tapeLeft = tapeLefts[index % tapeLefts.length];
+      var tapeRot = tapeRots[index % tapeRots.length];
+      var floatDur = floatDurations[index % floatDurations.length];
+      var floatDelay = floatDelays[index % floatDelays.length];
+      var decoration = makeDecoration(hash);
+      var isRare = hash % 17 === 0;
+      var isAdminNote = isAdmin(item);
+
+      var plainComment = normalizeText(stripHTML(item.comment || ''));
+      var isNew = false;
+
+      if (!matchedNew && lastSubmitted &&
+          normalizeText(item.nick || '') === normalizeText(lastSubmitted.nick || '') &&
+          plainComment === normalizeText(lastSubmitted.comment || '') &&
+          Date.now() - Number(lastSubmitted.stamp || 0) < 10 * 60 * 1000) {
+        isNew = true;
+        matchedNew = true;
+      }
+
+      el = document.createElement('article');
+      el.className = 'note ' + colorClass + ' ' + sizeClass + ' enter' +
+        (isNew ? ' note-new' : '') +
+        (isRare ? ' note-rare' : '') +
+        (isAdminNote ? ' note-admin' : '') +
+        (hasSearch ? ' search-hit' : '');
+
+      el.style.setProperty('--r', rotate + 'deg');
+      el.style.setProperty('--tx', tx + 'px');
+      el.style.setProperty('--ty', ty + 'px');
+      el.style.setProperty('--tape-left', tapeLeft);
+      el.style.setProperty('--tape-r', tapeRot);
+      el.style.setProperty('--float-dur', floatDur + 's');
+      el.style.setProperty('--float-delay', floatDelay + 's');
+      el.style.setProperty('--enter-delay', Math.min(index, 11) * 55 + 'ms');
+
+      var tags = [];
+      if (item.depth > 0 && item.parentNick) tags.push('<span class="note-tag">回复 ' + escapeHTML(item.parentNick) + '</span>');
+      if (isAdminNote) tags.push('<span class="note-tag">KAMI</span>');
+      if (isRare) tags.push('<span class="note-tag">RARE</span>');
+
+      el.innerHTML =
+        (isNew ? '<span class="note-badge">NEW</span>' : '') +
+        '<span class="note-decoration ' + decoration + '"></span>' +
+        '<div class="note-author">' + escapeHTML(item.nick || '匿名') + '</div>' +
+        '<div class="note-time">' + escapeHTML(formatTime(item.time)) + '</div>' +
+        (tags.length ? '<div class="note-meta">' + tags.join('') + '</div>' : '') +
+        '<div class="note-content">' + renderCommentHTML(item.comment || '') + '</div>';
+
+      el.addEventListener('mouseenter', function () {
+        wall.classList.add('is-focus-mode');
+        wall.querySelectorAll('.note').forEach(function (n) {
+          n.classList.remove('hover-focus');
+        });
+        el.classList.add('hover-focus');
+      });
+
+      el.addEventListener('mouseleave', function () {
+        el.classList.remove('hover-focus');
+        wall.classList.remove('is-focus-mode');
+      });
+
+      el.addEventListener('click', function () {
+        openModal(index, el);
+      });
+
+      wall.appendChild(el);
+
+      if (isNew) {
+        setTimeout(function () {
+          el.classList.remove('note-new');
+          var badge = el.querySelector('.note-badge');
+          if (badge) badge.remove();
+        }, 3200);
+      }
+    });
+
+    if (matchedNew) {
+      setTimeout(clearLastSubmitted, 1200);
+    }
+
+    updateLoadMore();
+  }
+
+  function getVisibleNoteElements() {
+    return Array.from(wall.querySelectorAll('.note'));
+  }
+
+  function updateModalNav() {
+    modalPrev.disabled = currentIndex <= 0;
+    modalNext.disabled = currentIndex >= Math.min(filteredNotes.length, visibleCount) - 1;
+  }
+
+  function fillModalContent(index) {
+    var item = filteredNotes[index];
+    var colorClass = colors[index % colors.length];
+    modalCard.className = 'note-modal-card ' + colorClass;
+    modalAuthor.textContent = item.nick || '匿名';
+    modalTime.textContent = formatTime(item.time);
+    modalContent.innerHTML = renderCommentHTML(item.comment || '');
+    updateModalNav();
+  }
+
+  function animateModalOpen(anchorEl) {
+    var cardRect = modalCard.getBoundingClientRect();
+    var rect = anchorEl.getBoundingClientRect();
+    lastAnchorRect = rect;
+
+    var viewportCenterX = window.innerWidth / 2;
+    var viewportCenterY = window.innerHeight / 2;
+    var noteCenterX = rect.left + rect.width / 2;
+    var noteCenterY = rect.top + rect.height / 2;
+    var dx = noteCenterX - viewportCenterX;
+    var dy = noteCenterY - viewportCenterY;
+    var scale = Math.max(0.34, Math.min(rect.width / cardRect.width, rect.height / cardRect.height));
+
+    modalCard.style.transition = 'none';
+    modalCard.style.opacity = '0.36';
+    modalCard.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(' + scale + ')';
+
+    requestAnimationFrame(function () {
+      modalCard.style.transition = 'transform 0.32s cubic-bezier(.2,.8,.2,1), opacity 0.28s ease';
+      modalCard.style.opacity = '1';
+      modalCard.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+  }
+
+  function animateModalClose(callback) {
+    if (!lastAnchorRect) {
+      modal.classList.remove('show');
+      if (callback) callback();
+      return;
+    }
+
+    var rect = lastAnchorRect;
+    var cardRect = modalCard.getBoundingClientRect();
+    var viewportCenterX = window.innerWidth / 2;
+    var viewportCenterY = window.innerHeight / 2;
+    var noteCenterX = rect.left + rect.width / 2;
+    var noteCenterY = rect.top + rect.height / 2;
+    var dx = noteCenterX - viewportCenterX;
+    var dy = noteCenterY - viewportCenterY;
+    var scale = Math.max(0.34, Math.min(rect.width / cardRect.width, rect.height / cardRect.height));
+
+    modalCard.style.transition = 'transform 0.28s cubic-bezier(.2,.8,.2,1), opacity 0.24s ease';
+    modalCard.style.opacity = '0.28';
+    modalCard.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(' + scale + ')';
+
+    setTimeout(function () {
+      modal.classList.remove('show');
+      modalCard.style.transition = '';
+      modalCard.style.opacity = '1';
+      modalCard.style.transform = 'translate(-50%, -50%) scale(1)';
+      if (callback) callback();
+    }, 290);
+  }
+
+  function openModal(index, anchorEl) {
+    currentIndex = index;
+    fillModalContent(index);
+    modal.classList.add('show');
+    modalOpen = true;
+
+    requestAnimationFrame(function () {
+      animateModalOpen(anchorEl || getVisibleNoteElements()[index]);
+    });
+  }
+
+  function switchModal(direction) {
+    if (modalSwitching) return;
+    var nextIndex = currentIndex + direction;
+    var maxIndex = Math.min(filteredNotes.length, visibleCount) - 1;
+    if (nextIndex < 0 || nextIndex > maxIndex) return;
+
+    modalSwitching = true;
+
+    var outClass = direction > 0 ? 'switch-out-left' : 'switch-out-right';
+    var inClass = direction > 0 ? 'switch-in-left' : 'switch-in-right';
+
+    modalCard.classList.remove('switch-out-left', 'switch-out-right', 'switch-in-left', 'switch-in-right');
+    modalCard.classList.add(outClass);
+
+    setTimeout(function () {
+      currentIndex = nextIndex;
+      fillModalContent(currentIndex);
+      modalCard.classList.remove(outClass);
+      modalCard.classList.add(inClass);
+
+      setTimeout(function () {
+        modalCard.classList.remove(inClass);
+        modalSwitching = false;
+      }, 220);
+    }, 170);
+  }
+
+  function closeModal() {
+    if (!modalOpen) return;
+    modalOpen = false;
+    animateModalClose();
+  }
+
+  function prevModal() {
+    switchModal(-1);
+  }
+
+  function nextModal() {
+    switchModal(1);
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  modalPrev.addEventListener('click', prevModal);
+  modalNext.addEventListener('click', nextModal);
+
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!modalOpen) return;
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'ArrowLeft') prevModal();
+    if (e.key === 'ArrowRight') nextModal();
+  });
+
+  function setTip(text, isError) {
+    noteFormTip.textContent = text || '';
+    noteFormTip.classList.remove('is-ok', 'is-error');
+
+    if (!text) return;
+
+    if (isError) {
+      noteFormTip.classList.add('is-error');
+    } else {
+      noteFormTip.classList.add('is-ok');
+    }
+  }
+
+  function loadWall() {
+    wall.innerHTML = '<div class="wall-empty">正在加载留言墙...</div>';
+    loadComments()
+      .then(function (data) {
+        notesData = data;
+        applyFiltersAndSort();
+      })
+      .catch(function (err) {
+        wall.innerHTML = '<div class="wall-empty">留言墙加载失败了，检查一下 Waline 服务地址吧。</div>';
+        console.error(err);
+      });
+  }
+
+  function submitComment(payload) {
+    return fetch(SERVER_URL + '/api/comment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) {
+        return res.text().then(function (rawText) {
+          var data = {};
+          try {
+            data = rawText ? JSON.parse(rawText) : {};
+          } catch (e) {
+            data = { rawText: rawText };
+          }
+
+          console.log('[留言提交结果]', {
+            status: res.status,
+            ok: res.ok,
+            payload: payload,
+            data: data,
+            rawText: rawText
+          });
+
+          if (!res.ok) {
+            throw new Error('HTTP ' + res.status + ': ' + (((data && (data.msg || data.message)) || rawText || '发送失败')));
+          }
+          return data;
+        });
+      });
+  }
+
+  function handleCustomSubmit() {
+    var nick = noteNick.value.trim();
+    var mail = noteMail.value.trim();
+    var comment = noteComment.value.trim();
+
+    if (!nick) {
+      setTip('请先写昵称', true);
+      return Promise.resolve();
+    }
+
+    if (!comment) {
+      setTip('请先写留言内容', true);
+      return Promise.resolve();
+    }
+
+    noteSubmit.disabled = true;
+    setTip('正在贴上去...');
+    console.log('[留言提交] handleCustomSubmit start');
+
+    return submitComment({
+      nick: nick,
+      mail: mail,
+      comment: comment,
+      url: CANONICAL_PATH,
+      ua: navigator.userAgent
+    }).then(function () {
+      try {
+        localStorage.setItem(NEW_NOTE_KEY, JSON.stringify({
+          nick: nick,
+          comment: comment,
+          stamp: Date.now()
+        }));
+      } catch (e) {}
+
+      clearDraft();
+      noteComment.value = '';
+      autoResizeTextarea(noteComment);
+      visibleCount = INITIAL_VISIBLE;
+
+      noteForm.classList.remove('sent');
+      void noteForm.offsetWidth;
+      noteForm.classList.add('sent');
+
+      setTip('贴上去啦 ✨');
+
+      setTimeout(loadWall, 1200);
+      setTimeout(loadWall, 2600);
+      setTimeout(loadWall, 4200);
+    }).catch(function (err) {
+      saveDraft();
+      setTip((err.message || '发送失败') + '，草稿已保存在本地', true);
+      console.error(err);
+    }).finally(function () {
+      noteSubmit.disabled = false;
+    });
+  }
+
+  noteForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  });
+
+  noteSubmit.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('[留言按钮] click');
+    handleCustomSubmit();
+  });
+
+  noteComment.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleCustomSubmit();
+    }
+  });
+
+  noteNick.addEventListener('input', saveDraft);
+  noteMail.addEventListener('input', saveDraft);
+  noteComment.addEventListener('input', function () {
+    autoResizeTextarea(noteComment);
+    saveDraft();
+  });
+
+  quickActions.addEventListener('click', function (e) {
+    var btn = e.target.closest('.quick-btn');
+    if (!btn) return;
+    var fill = btn.getAttribute('data-fill') || '';
+    noteComment.value = noteComment.value + (noteComment.value ? '\n' : '') + fill;
+    autoResizeTextarea(noteComment);
+    saveDraft();
+    noteComment.focus();
+  });
+
+  sortGroup.addEventListener('click', function (e) {
+    var btn = e.target.closest('.sort-btn');
+    if (!btn) return;
+    sortMode = btn.getAttribute('data-sort') || 'latest';
+    if (sortMode === 'random') randomSeed = Date.now();
+    visibleCount = INITIAL_VISIBLE;
+
+    sortGroup.querySelectorAll('.sort-btn').forEach(function (b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    applyFiltersAndSort();
+  });
+
+  searchInput.addEventListener('input', function () {
+    visibleCount = INITIAL_VISIBLE;
+    applyFiltersAndSort();
+  });
+
+  modeToggle.addEventListener('click', function () {
+    var next = commentsPage.dataset.mode === 'night' ? 'day' : 'night';
+    commentsPage.dataset.mode = next;
+    modeToggle.textContent = next === 'night' ? '日间氛围' : '夜间氛围';
+    try {
+      localStorage.setItem(MODE_KEY, next);
+    } catch (e) {}
+  });
+
+  loadMoreBtn.addEventListener('click', function () {
+    visibleCount += LOAD_MORE_STEP;
+    renderWall(filteredNotes);
+  });
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && filteredNotes.length > visibleCount) {
+          visibleCount += LOAD_MORE_STEP;
+          renderWall(filteredNotes);
+        }
+      });
+    }, { rootMargin: '240px' });
+    io.observe(autoLoadSentinel);
+  }
+
+  function bindWallParallax() {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
+    wallWrap.addEventListener('mousemove', function (e) {
+      var rect = wallWrap.getBoundingClientRect();
+      var px = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      var py = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      var rx = py * -2.8;
+      var ry = px * 2.8;
+
+      wallWrap.style.transform = 'perspective(1300px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+      wallWrap.style.boxShadow = '0 28px 60px rgba(4,10,24,0.24), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 40px rgba(56,189,248,0.10)';
+
+      wall.querySelectorAll('.note').forEach(function (note, idx) {
+        var depth = (idx % 5) + 1;
+        note.style.setProperty('--dx', (px * depth * 1.8) + 'px');
+        note.style.setProperty('--dy', (py * depth * 1.2) + 'px');
+      });
+    });
+
+    wallWrap.addEventListener('mouseleave', function () {
+      wallWrap.style.transform = 'perspective(1300px) rotateX(0deg) rotateY(0deg)';
+      wallWrap.style.boxShadow = '0 22px 52px rgba(4,10,24,0.20), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 36px rgba(124,108,255,0.08)';
+      wall.classList.remove('is-focus-mode');
+      wall.querySelectorAll('.note').forEach(function (n) {
+        n.classList.remove('hover-focus');
+        n.style.setProperty('--dx', '0px');
+        n.style.setProperty('--dy', '0px');
+      });
+    });
+  }
+
+  function restoreMode() {
+    try {
+      var saved = localStorage.getItem(MODE_KEY);
+      if (saved === 'night' || saved === 'day') {
+        commentsPage.dataset.mode = saved;
+        modeToggle.textContent = saved === 'night' ? '日间氛围' : '夜间氛围';
+      }
+    } catch (e) {}
+  }
+
+  function initDraftNotice() {
+    try {
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d.comment || d.nick || d.mail) {
+          setTip('已恢复上次草稿。');
+        }
+      }
+    } catch (e) {}
+  }
+
+  restoreMode();
+  loadDraft();
+  autoResizeTextarea(noteComment);
+  initDraftNotice();
+  startWalineRemovalGuard();
+  bindWallParallax();
+  loadWall();
+})();
+</script>
