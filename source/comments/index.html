@@ -76,7 +76,7 @@ comment: false
   padding: 1.2rem 0 3rem;
   overflow: hidden;
   border-radius: var(--page-radius);
-  background: url('/images/comments-bg.jpg') center center / cover no-repeat fixed;
+  background: url('/images/comments-bg.jpg') center center / cover no-repeat;
 }
 
 .comments-page::before {
@@ -150,19 +150,7 @@ comment: false
 }
 
 .comments-page .page-sheen {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  border-radius: var(--page-radius);
-  background: linear-gradient(
-    115deg,
-    rgba(255,255,255,0) 18%,
-    rgba(255,255,255,0.05) 28%,
-    rgba(255,255,255,0.00) 40%
-  );
-  transform: translateX(-40%);
-  animation: pageSheenMove 11s linear infinite;
+  display: none !important;
 }
 
 .comments-shell {
@@ -193,8 +181,6 @@ comment: false
     0 22px 48px rgba(8,18,42,0.18),
     0 0 0 1px rgba(255,255,255,0.06) inset,
     0 0 34px rgba(93,63,211,0.12);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 }
 
@@ -210,15 +196,13 @@ comment: false
   position: absolute;
   inset: -1px;
   border-radius: var(--panel-radius);
-  background: var(--tech-line);
-  background-size: 240% 240%;
-  opacity: 0.98;
+  background: linear-gradient(120deg, rgba(124,108,255,0.42), rgba(56,189,248,0.18), rgba(255,255,255,0.04));
+  opacity: 0.85;
   pointer-events: none;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
   padding: 1px;
-  animation: formBorderFlow 8s linear infinite;
 }
 
 .note-form::after {
@@ -226,12 +210,8 @@ comment: false
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 12% 22%, rgba(124,108,255,0.18), transparent 24%),
-    radial-gradient(circle at 84% 26%, rgba(56,189,248,0.14), transparent 26%),
-    linear-gradient(115deg, rgba(255,255,255,0) 20%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0) 46%);
-  background-size: auto, auto, 220% 100%;
-  background-repeat: no-repeat;
-  animation: formSheen 8s linear infinite;
+    radial-gradient(circle at 12% 22%, rgba(124,108,255,0.10), transparent 22%),
+    radial-gradient(circle at 84% 26%, rgba(56,189,248,0.08), transparent 24%);
   pointer-events: none;
 }
 
@@ -513,17 +493,13 @@ comment: false
   position: relative;
   border-radius: var(--wall-radius);
   padding: 1rem;
-  background: var(--tech-wall);
-  border: 1px solid rgba(124,108,255,0.14);
+  background: linear-gradient(180deg, rgba(12,20,44,0.90), rgba(9,15,34,0.88));
+  border: 1px solid rgba(124,108,255,0.12);
   box-shadow:
-    0 22px 52px rgba(4,10,24,0.20),
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 0 36px rgba(124,108,255,0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    0 18px 40px rgba(4,10,24,0.18),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
   overflow: hidden;
-  transform-style: preserve-3d;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: box-shadow 0.18s ease;
 }
 
 .notes-wall-wrap::before {
@@ -532,12 +508,10 @@ comment: false
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(120deg, rgba(255,255,255,0) 18%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0) 42%);
-  background-size: 22px 22px, 22px 22px, 220% 100%;
-  animation: wallSheen 9s linear infinite;
-  opacity: 0.72;
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px;
+  opacity: 0.28;
 }
 
 .notes-wall-wrap::after {
@@ -547,9 +521,7 @@ comment: false
   pointer-events: none;
   border-radius: inherit;
   box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,0.05),
-    inset 0 0 38px rgba(56,189,248,0.06),
-    0 0 0 1px rgba(124,108,255,0.10);
+    inset 0 0 0 1px rgba(255,255,255,0.04);
   z-index: 1;
 }
 
@@ -588,33 +560,28 @@ comment: false
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  padding: 1rem 1.5rem;
+  padding: 0.9rem 1.35rem;
   border-radius: 999px;
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: transparent !important;
-  background: linear-gradient(90deg, rgba(18,26,58,0.76), rgba(10,18,40,0.70));
-  border: 1px solid rgba(124,108,255,0.24);
-  box-shadow:
-    0 18px 36px rgba(4,10,24,0.22),
-    0 0 26px rgba(124,108,255,0.16);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(90deg, rgba(22,28,54,0.92), rgba(12,18,38,0.90));
+  border: 1px solid rgba(124,108,255,0.18);
+  box-shadow: 0 14px 28px rgba(4,10,24,0.18);
   pointer-events: none;
   transition: opacity 0.22s ease, transform 0.22s ease;
   white-space: nowrap;
-  animation: tipBreath 3.6s ease-in-out infinite, tipFloat 4.6s ease-in-out infinite;
   z-index: 3;
 }
 
 .wall-cover-tip .tip-front,
 .wall-cover-tip .tip-back {
-  display: block;
-  background: linear-gradient(90deg, #8d7dff, #6ee7ff, #b6f7ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
+  position: absolute;
+  inset: 0;
+  filter: blur(8px);
+  opacity: 0.28;
+  transform: scale(1.01);
 }
 
 .wall-cover-tip .tip-back {
@@ -638,8 +605,6 @@ comment: false
   --ty: 0px;
   --dx: 0px;
   --dy: 0px;
-  --float-dur: 4.6s;
-  --float-delay: 0s;
   --enter-delay: 0ms;
   position: relative;
   display: inline-block;
@@ -652,19 +617,16 @@ comment: false
     0 12px 24px rgba(0,0,0,0.10),
     0 2px 0 rgba(255,255,255,0.32) inset,
     0 0 16px rgba(255,255,255,0.10);
-  transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy))) rotate(var(--r));
+  transform: translate(var(--tx), var(--ty)) rotate(var(--r));
   cursor: pointer;
   overflow: hidden;
   break-inside: avoid;
   -webkit-column-break-inside: avoid;
-  animation: noteFloat var(--float-dur) ease-in-out infinite var(--float-delay);
   transition: box-shadow 0.18s ease, filter 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
 }
 
 .note.enter {
-  animation:
-    noteEnter 0.55s cubic-bezier(.2,.75,.2,1) both var(--enter-delay),
-    noteFloat var(--float-dur) ease-in-out infinite calc(var(--float-delay) + 0.2s);
+  animation: noteEnter 0.42s cubic-bezier(.2,.75,.2,1) both var(--enter-delay);
 }
 
 .note::after {
@@ -685,15 +647,13 @@ comment: false
 }
 
 .note:hover {
-  animation: none;
-  transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy) - 7px)) rotate(var(--r)) scale(1.024);
+  transform: translate(var(--tx), calc(var(--ty) - 4px)) rotate(var(--r)) scale(1.012);
   box-shadow:
-    0 20px 34px rgba(0,0,0,0.15),
+    0 18px 28px rgba(0,0,0,0.14),
     0 2px 0 rgba(255,255,255,0.35) inset,
-    0 0 0 1px rgba(124,108,255,0.24),
-    0 0 28px rgba(124,108,255,0.22),
-    0 0 42px rgba(56,189,248,0.14);
-  filter: saturate(1.05);
+    0 0 0 1px rgba(124,108,255,0.18),
+    0 0 18px rgba(56,189,248,0.10);
+  filter: saturate(1.03);
   z-index: 4;
 }
 
@@ -1168,14 +1128,7 @@ comment: false
   }
 }
 
-@keyframes noteFloat {
-  0%, 100% {
-    transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy))) rotate(var(--r));
-  }
-  50% {
-    transform: translate(calc(var(--tx) + var(--dx)), calc(var(--ty) + var(--dy) - 6px)) rotate(calc(var(--r) + 0.5deg));
-  }
-}
+
 
 @keyframes newNotePulse {
   0% {
@@ -1499,18 +1452,11 @@ comment: false
   }
 
   function startWalineRemovalGuard() {
-    removeThemeWaline();
-    var observer = new MutationObserver(function () {
-      removeThemeWaline();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    window.addEventListener('load', removeThemeWaline);
-    setTimeout(removeThemeWaline, 300);
-    setTimeout(removeThemeWaline, 1000);
-    setTimeout(removeThemeWaline, 2500);
-    setTimeout(removeThemeWaline, 5000);
-  }
+  removeThemeWaline();
+  window.addEventListener('load', removeThemeWaline);
+  setTimeout(removeThemeWaline, 300);
+  setTimeout(removeThemeWaline, 1200);
+}
 
   function saveDraft() {
     try {
@@ -2214,37 +2160,18 @@ comment: false
   }
 
   function bindWallParallax() {
-    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return;
+  wallWrap.addEventListener('mouseenter', function () {
+    wallWrap.style.boxShadow = '0 22px 46px rgba(4,10,24,0.22), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 24px rgba(56,189,248,0.08)';
+  });
 
-    wallWrap.addEventListener('mousemove', function (e) {
-      var rect = wallWrap.getBoundingClientRect();
-      var px = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      var py = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-      var rx = py * -2.8;
-      var ry = px * 2.8;
-
-      wallWrap.style.transform = 'perspective(1300px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
-      wallWrap.style.boxShadow = '0 28px 60px rgba(4,10,24,0.24), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 40px rgba(56,189,248,0.10)';
-
-      wall.querySelectorAll('.note').forEach(function (note, idx) {
-        var depth = (idx % 5) + 1;
-        note.style.setProperty('--dx', (px * depth * 1.8) + 'px');
-        note.style.setProperty('--dy', (py * depth * 1.2) + 'px');
-      });
+  wallWrap.addEventListener('mouseleave', function () {
+    wallWrap.style.boxShadow = '0 18px 40px rgba(4,10,24,0.18), 0 0 0 1px rgba(255,255,255,0.04) inset';
+    wall.classList.remove('is-focus-mode');
+    wall.querySelectorAll('.note').forEach(function (n) {
+      n.classList.remove('hover-focus');
     });
-
-    wallWrap.addEventListener('mouseleave', function () {
-      wallWrap.style.transform = 'perspective(1300px) rotateX(0deg) rotateY(0deg)';
-      wallWrap.style.boxShadow = '0 22px 52px rgba(4,10,24,0.20), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 36px rgba(124,108,255,0.08)';
-      wall.classList.remove('is-focus-mode');
-      wall.querySelectorAll('.note').forEach(function (n) {
-        n.classList.remove('hover-focus');
-        n.style.setProperty('--dx', '0px');
-        n.style.setProperty('--dy', '0px');
-      });
-    });
-  }
+  });
+}
 
   function restoreMode() {
     try {
