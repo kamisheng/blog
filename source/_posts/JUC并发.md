@@ -2,7 +2,7 @@
 title: JUC并发
 date: 2026-04-14 05:24:24
 updated: 2026-04-15 15:10:24
-cover: images/JUC.jpg
+cover: /images/juc-cover.png
 tags: JUC
 categories: java
 ---

@@ -4,7 +4,7 @@ date: 2026-04-14 14:39:20
 tags: Linux
 categories: 技术          # 分类
 description: Linux操作基础知识  # 描述
-cover: /images/Linux.jpg     # 封面图
+cover: /images/linux-cover.png     # 封面图
 ---
 
 

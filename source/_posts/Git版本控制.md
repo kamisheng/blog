@@ -5,7 +5,7 @@ updated: 2026-04-14 20:30:00
 tags: Git版本控制
 categories: 技术工具         # 分类
 description: Git版本控制  # 描述
-cover: /images/Git.jpg     # 封面图
+cover: /images/git-cover.png     # 封面图
 ---
 
 ## Git简介

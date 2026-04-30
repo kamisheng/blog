@@ -4,7 +4,7 @@ date: 2026-04-14 14:59:52
 updated: 2026-04-14 14:59:52
 tags: JVM
 categories: java
-cover: images/JVM.jpg
+cover: /images/jvm-cover.png
 
 ---
 
