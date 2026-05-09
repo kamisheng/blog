@@ -3,9 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "hexo generate",
+    "build": "npm run build:auth && hexo generate",
+    "build:auth": "npm --prefix auth-login install && npm --prefix auth-login run build",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
+    "auth:dev": "npm --prefix auth-login install && npm --prefix auth-login run dev",
     "server": "hexo server"
   },
   "hexo": {

@@ -217,15 +217,16 @@ navbar:
     Tags:
       path: /tags/
       icon: fa-solid fa-tags
-    Bookmarks: #取名随意
-      icon: fa-solid fa-bookmark #图标
-      path: /bookmarks/
     Links: 
       icon: fa-regular fa-link
       submenus:
         About: /about
         留言板: /comments
-        技能树: /skills
+        Bookmarks: /bookmarks/
+    Login:
+      path: /login/
+      icon: fa-solid fa-right-to-bracket
+#        技能树: /skills
           
     # About: 
     #   icon: fa-regular fa-user
