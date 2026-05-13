@@ -531,14 +531,12 @@ onMounted(() => {
   scheduleOrangeBlink()
   scheduleYellowBlink()
 
-  // Trigger entrance animation completion after all animations finish
-  // Purple: 1.2s, Black: 1s + 0.2s delay = 1.2s, Orange: 1.1s + 0.1s = 1.2s, Yellow: 1s + 0.3s = 1.3s
-  // Wait for the longest animation (Yellow at 1.3s) plus a small buffer
+  // Trigger character interactions after the staggered drop-in animations finish.
   setTimeout(() => {
     hasEntered.value = true
     updateCharacterCenters()
     rafId = requestAnimationFrame(updatePositions)
-  }, 1400)
+  }, 1850)
 })
 
 onUnmounted(() => {
@@ -573,7 +571,7 @@ onUnmounted(() => {
 
 /* Entrance animations */
 .purple-character {
-  animation: purple-entrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: purple-entrance 1.55s cubic-bezier(0.18, 0.92, 0.24, 1) 0.08s backwards;
 }
 
 .purple-character.entrance-complete {
@@ -581,7 +579,7 @@ onUnmounted(() => {
 }
 
 .black-character {
-  animation: black-entrance 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s backwards;
+  animation: black-entrance 1.38s cubic-bezier(0.18, 0.92, 0.24, 1) 0.28s backwards;
 }
 
 .black-character.entrance-complete {
@@ -589,7 +587,7 @@ onUnmounted(() => {
 }
 
 .orange-character {
-  animation: orange-entrance 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
+  animation: orange-entrance 1.42s cubic-bezier(0.18, 0.92, 0.24, 1) backwards;
 }
 
 .orange-character.entrance-complete {
@@ -597,7 +595,7 @@ onUnmounted(() => {
 }
 
 .yellow-character {
-  animation: yellow-entrance 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
+  animation: yellow-entrance 1.48s cubic-bezier(0.18, 0.92, 0.24, 1) 0.18s backwards;
 }
 
 .yellow-character.entrance-complete {
@@ -606,56 +604,84 @@ onUnmounted(() => {
 
 @keyframes purple-entrance {
   0% {
-    transform: translateX(-150px) translateY(50px) rotate(-15deg) scale(0.3);
+    transform: translate3d(-34px, -620px, 0) rotate(-18deg) scale(0.98, 1.04);
     opacity: 0;
   }
-  60% {
-    transform: translateX(10px) translateY(-10px) rotate(3deg) scale(1.05);
+  58% {
+    transform: translate3d(18px, 16px, 0) rotate(7deg) scale(1.04, 0.96);
+    opacity: 1;
+  }
+  72% {
+    transform: translate3d(-10px, -36px, 0) rotate(-4deg) scale(0.98, 1.03);
+  }
+  86% {
+    transform: translate3d(5px, 7px, 0) rotate(2deg) scale(1.01, 0.99);
   }
   100% {
-    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
     opacity: 1;
   }
 }
 
 @keyframes black-entrance {
   0% {
-    transform: translateY(-100px) scale(0.5);
+    transform: translate3d(26px, -560px, 0) rotate(13deg) scale(0.98, 1.04);
     opacity: 0;
   }
-  70% {
-    transform: translateY(10px) scale(1.08);
+  56% {
+    transform: translate3d(-12px, 14px, 0) rotate(-5deg) scale(1.05, 0.95);
+    opacity: 1;
+  }
+  73% {
+    transform: translate3d(8px, -28px, 0) rotate(3deg) scale(0.99, 1.02);
+  }
+  88% {
+    transform: translate3d(-3px, 5px, 0) rotate(-1deg) scale(1.01, 0.99);
   }
   100% {
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
     opacity: 1;
   }
 }
 
 @keyframes orange-entrance {
   0% {
-    transform: translateX(-200px) translateY(80px) rotate(-25deg) scale(0.2);
+    transform: translate3d(-88px, -520px, 0) rotate(-24deg) scale(1.04, 0.96);
     opacity: 0;
   }
-  65% {
-    transform: translateX(15px) translateY(-8px) rotate(5deg) scale(1.1);
+  52% {
+    transform: translate3d(24px, 12px, 0) rotate(9deg) scale(1.08, 0.92);
+    opacity: 1;
+  }
+  68% {
+    transform: translate3d(-16px, -32px, 0) rotate(-6deg) scale(0.98, 1.02);
+  }
+  84% {
+    transform: translate3d(7px, 5px, 0) rotate(2deg) scale(1.02, 0.99);
   }
   100% {
-    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
     opacity: 1;
   }
 }
 
 @keyframes yellow-entrance {
   0% {
-    transform: translateX(200px) translateY(60px) rotate(20deg) scale(0.3);
+    transform: translate3d(74px, -590px, 0) rotate(20deg) scale(0.98, 1.04);
     opacity: 0;
   }
-  65% {
-    transform: translateX(-12px) translateY(-5px) rotate(-4deg) scale(1.06);
+  55% {
+    transform: translate3d(-20px, 15px, 0) rotate(-8deg) scale(1.06, 0.94);
+    opacity: 1;
+  }
+  72% {
+    transform: translate3d(13px, -34px, 0) rotate(5deg) scale(0.98, 1.03);
+  }
+  88% {
+    transform: translate3d(-5px, 6px, 0) rotate(-2deg) scale(1.01, 0.99);
   }
   100% {
-    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
     opacity: 1;
   }
 }

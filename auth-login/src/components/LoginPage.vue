@@ -151,7 +151,17 @@
             {{ errorMessage }}
           </div>
 
-          <button type="submit" class="submit-button" :disabled="isLoading">
+          <button
+            ref="submitButtonRef"
+            type="submit"
+            class="submit-button"
+            :class="{ 'is-evasive': !isSubmitReady && !isLoading }"
+            :disabled="isLoading"
+            @click="handleSubmitButtonClick"
+            @mousemove="handleSubmitMouseMove"
+            @mouseleave="resetSubmitButton"
+            @blur="resetSubmitButton"
+          >
             <span class="button-text">
               {{ isLoading ? (isRegister ? '注册中...' : '登录中...') : (isRegister ? '创建账号' : '登录') }}
             </span>
@@ -203,8 +213,128 @@ const loginFailed = ref(false)
 const loginSuccess = ref(false)
 const errorMessage = ref('')
 const errors = ref({})
+const submitButtonRef = ref(null)
+let submitButtonOffset = { x: 0, y: 0 }
+let submitButtonTarget = { x: 0, y: 0 }
+let lastDodgeAngle = -Math.PI / 2
+let submitButtonAnimationFrame = 0
+
+const applySubmitButtonTransform = () => {
+  const button = submitButtonRef.value
+  if (!button) return
+
+  submitButtonOffset.x += (submitButtonTarget.x - submitButtonOffset.x) * 0.16
+  submitButtonOffset.y += (submitButtonTarget.y - submitButtonOffset.y) * 0.16
+
+  if (Math.abs(submitButtonOffset.x) < 0.35 && Math.abs(submitButtonOffset.y) < 0.35) {
+    submitButtonOffset = { x: 0, y: 0 }
+  }
+
+  const ox = submitButtonOffset.x
+  const oy = submitButtonOffset.y
+  const rotateY = Math.max(-8, Math.min(8, ox * 0.11))
+  const rotateX = Math.max(-8, Math.min(8, -oy * 0.11))
+  button.style.transform = `translate3d(${ox}px, ${oy}px, 0) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+  button.style.boxShadow = Math.abs(ox) + Math.abs(oy) > 2
+    ? `${-ox * 0.22}px ${Math.max(14, 24 - oy * 0.12)}px 34px rgba(40, 71, 186, 0.3)`
+    : ''
+
+  if (
+    Math.abs(submitButtonTarget.x - submitButtonOffset.x) > 0.5
+    || Math.abs(submitButtonTarget.y - submitButtonOffset.y) > 0.5
+  ) {
+    submitButtonAnimationFrame = window.requestAnimationFrame(applySubmitButtonTransform)
+  } else {
+    submitButtonAnimationFrame = 0
+  }
+}
+
+const setSubmitButtonTarget = (x, y) => {
+  submitButtonTarget = { x, y }
+  if (!submitButtonAnimationFrame) {
+    submitButtonAnimationFrame = window.requestAnimationFrame(applySubmitButtonTransform)
+  }
+}
 
 const isRegister = computed(() => mode.value === 'register')
+const isSubmitReady = computed(() => {
+  if (isRegister.value) {
+    return /^[A-Za-z0-9_]{3,20}$/.test(username.value)
+      && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)
+      && password.value.length >= 6
+      && password.value.length <= 32
+      && password.value === confirmPassword.value
+  }
+  return account.value.trim() !== ''
+    && password.value.length >= 6
+    && password.value.length <= 32
+})
+
+const distanceBetween = (p1x, p1y, p2x, p2y) => {
+  const dx = p1x - p2x
+  const dy = p1y - p2y
+  return Math.sqrt(dx * dx + dy * dy)
+}
+
+const resetSubmitButton = () => {
+  const button = submitButtonRef.value
+  if (!button) return
+  setSubmitButtonTarget(0, 0)
+}
+
+const handleSubmitMouseMove = (event) => {
+  const button = submitButtonRef.value
+  if (!button || isLoading.value) return
+
+  if (isSubmitReady.value) {
+    resetSubmitButton()
+    return
+  }
+
+  const rect = button.getBoundingClientRect()
+  const bx = rect.left + rect.width / 2
+  const by = rect.top + rect.height / 2
+  const radius = Math.max(button.offsetWidth * 1.9, button.offsetHeight * 3.2, 220)
+  const dist = distanceBetween(event.clientX, event.clientY, bx, by)
+
+  if (dist > radius) {
+    resetSubmitButton()
+    return
+  }
+
+  const rawAngle = Math.atan2(event.clientY - by, event.clientX - bx)
+  const angle = dist < 42 ? lastDodgeAngle : (lastDodgeAngle * 0.82 + rawAngle * 0.18)
+  lastDodgeAngle = angle
+  const strength = Math.max(radius - dist, 0) / radius
+  const maxMove = window.innerWidth <= 520 ? 54 : 118
+  const move = maxMove * strength
+  const maxX = window.innerWidth <= 520 ? 70 : 150
+  const maxY = window.innerWidth <= 520 ? 44 : 92
+  setSubmitButtonTarget(
+    Math.max(-maxX, Math.min(maxX, -Math.cos(angle) * move)),
+    Math.max(-maxY, Math.min(maxY, -Math.sin(angle) * move))
+  )
+}
+
+const dodgeSubmitButton = () => {
+  const button = submitButtonRef.value
+  if (!button) return
+
+  const direction = Math.random() > 0.5 ? 1 : -1
+  const isSmallScreen = window.innerWidth <= 520
+  const ox = direction * (isSmallScreen ? 44 + Math.random() * 18 : 96 + Math.random() * 42)
+  const oy = isSmallScreen ? -18 - Math.random() * 18 : -28 - Math.random() * 34
+  setSubmitButtonTarget(ox, oy)
+}
+
+const handleSubmitButtonClick = (event) => {
+  if (isLoading.value || isSubmitReady.value) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  validateForm()
+  dodgeSubmitButton()
+}
 
 const switchMode = (nextMode) => {
   mode.value = nextMode
@@ -212,6 +342,7 @@ const switchMode = (nextMode) => {
   errors.value = {}
   loginFailed.value = false
   loginSuccess.value = false
+  resetSubmitButton()
   const url = new URL(window.location.href)
   if (nextMode === 'register') {
     url.searchParams.set('mode', 'register')
@@ -267,6 +398,7 @@ const callApi = async (path, body) => {
 }
 
 const handleSubmit = async () => {
+  resetSubmitButton()
   if (!validateForm()) return
 
   isLoading.value = true
@@ -317,12 +449,23 @@ const handleSubmit = async () => {
 
 <style scoped>
 .login-page {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   min-height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-  background: #ffffff;
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+.login-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(135deg, rgba(8, 12, 24, 0.44), rgba(8, 12, 24, 0.18)),
+    url('/images/mm.jpg') center / cover no-repeat;
+  pointer-events: none;
 }
 
 .left-section {
@@ -330,10 +473,7 @@ const handleSubmit = async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background:
-    radial-gradient(circle at 72% 22%, rgba(94, 234, 212, 0.18), transparent 28%),
-    radial-gradient(circle at 22% 78%, rgba(124, 58, 237, 0.2), transparent 32%),
-    linear-gradient(145deg, #11192f 0%, #1f3a8a 58%, #2448c5 100%);
+  background: linear-gradient(90deg, rgba(8, 12, 24, 0.2), transparent 78%);
   padding: 3rem;
   color: white;
 }
@@ -367,10 +507,15 @@ const handleSubmit = async () => {
 }
 
 .characters-section {
+  position: absolute;
+  left: 50%;
+  bottom: 6.5rem;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  height: 520px;
+  width: min(88%, 620px);
+  height: 420px;
+  transform: translateX(-50%);
 }
 
 .footer-links {
@@ -428,7 +573,7 @@ const handleSubmit = async () => {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: white;
+  background: transparent;
 }
 
 .form-wrapper {
@@ -449,26 +594,28 @@ const handleSubmit = async () => {
   gap: 0.25rem;
   padding: 0.25rem;
   margin-bottom: 2rem;
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.14);
   border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
 }
 
 .mode-button {
   height: 2.5rem;
   border: 0;
   border-radius: 0.55rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.78);
   background: transparent;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
+  text-shadow: 0 2px 10px rgba(8, 12, 24, 0.45);
 }
 
 .mode-button.active {
-  color: #111827;
-  background: #ffffff;
-  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 18px rgba(8, 12, 24, 0.16);
 }
 
 .form-header {
@@ -478,20 +625,23 @@ const handleSubmit = async () => {
 
 .form-title {
   margin-bottom: 0.5rem;
-  color: #111827;
+  color: #ffffff;
   font-size: 1.875rem;
   font-weight: 800;
+  text-shadow: 0 3px 14px rgba(8, 12, 24, 0.5);
 }
 
 .form-subtitle {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.9rem;
+  text-shadow: 0 2px 10px rgba(8, 12, 24, 0.45);
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow: visible;
 }
 
 .form-group {
@@ -574,9 +724,10 @@ const handleSubmit = async () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #4b5563;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.875rem;
   cursor: pointer;
+  text-shadow: 0 2px 10px rgba(8, 12, 24, 0.45);
 }
 
 .checkbox {
@@ -586,10 +737,11 @@ const handleSubmit = async () => {
 }
 
 .forgot-link {
-  color: #3153d8;
+  color: #ffffff;
   font-size: 0.875rem;
   font-weight: 700;
   text-decoration: none;
+  text-shadow: 0 2px 10px rgba(8, 12, 24, 0.45);
 }
 
 .forgot-link:hover {
@@ -611,7 +763,6 @@ const handleSubmit = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
   height: 3rem;
   gap: 0.55rem;
   border-radius: 0.65rem;
@@ -622,14 +773,36 @@ const handleSubmit = async () => {
 }
 
 .submit-button {
+  align-self: center;
+  width: min(100%, 260px);
+  z-index: 1;
   border: 0;
   color: #ffffff;
   background: #2847ba;
+  transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, background 0.2s, opacity 0.2s;
 }
 
-.submit-button:hover:not(:disabled) {
+.submit-button:hover:not(:disabled):not(.is-evasive) {
   transform: translateY(-2px);
   box-shadow: 0 14px 24px rgba(40, 71, 186, 0.24);
+}
+
+.submit-button.is-evasive {
+  background: linear-gradient(135deg, #2847ba, #3b5bdb);
+  cursor: not-allowed;
+}
+
+.submit-button.is-evasive::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 45%, rgba(255, 255, 255, 0.16));
+  opacity: 0.72;
+  pointer-events: none;
 }
 
 .submit-button:disabled {
@@ -643,7 +816,7 @@ const handleSubmit = async () => {
   transition: transform 0.2s;
 }
 
-.submit-button:hover:not(:disabled) .button-icon {
+.submit-button:hover:not(:disabled):not(.is-evasive) .button-icon {
   transform: translateX(6px);
 }
 
@@ -653,13 +826,14 @@ const handleSubmit = async () => {
   align-items: center;
   gap: 1rem;
   margin: 1.4rem 0;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.85rem;
+  text-shadow: 0 2px 10px rgba(8, 12, 24, 0.45);
 }
 
 .divider span {
   height: 1px;
-  background: #e5e7eb;
+  background: rgba(255, 255, 255, 0.58);
 }
 
 .divider b {
@@ -667,21 +841,25 @@ const handleSubmit = async () => {
 }
 
 .ghost-button {
-  border: 1.5px solid #e5e7eb;
-  color: #111827;
-  background: #ffffff;
+  width: 100%;
+  border: 1.5px solid rgba(255, 255, 255, 0.62);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 28px rgba(8, 12, 24, 0.16);
+  backdrop-filter: blur(8px);
 }
 
 .ghost-button:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.82);
 }
 
 .api-note {
   margin-top: 1.2rem;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.75rem;
   text-align: center;
+  text-shadow: 0 2px 10px rgba(8, 12, 24, 0.45);
 }
 
 @media (max-width: 1024px) {
