@@ -5,7 +5,8 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     outDir: '../source/assets/kami-comments',
-    emptyOutDir: true,
+    // 目录里还有手写的 wall.js（留言板运行时），不能被 vite 清空
+    emptyOutDir: false,
     rollupOptions: {
       input: 'src/main.js',
       output: {
