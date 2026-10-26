@@ -41,15 +41,33 @@ export async function request(path, { method = 'GET', body, auth = true } = {}) 
   const token = tokenStore.get()
   if (auth && token) headers.Authorization = `Bearer ${token}`
 
+  // CF→源站偶发 525/5xx 与跨境慢连接：GET 幂等，重试一次；并加 12s 超时，避免一直停在加载态
+  const canRetry = method === 'GET'
   let response
-  try {
-    response = await fetch(apiBase + path, {
-      method,
-      headers,
-      body: body == null ? undefined : JSON.stringify(body),
-    })
-  } catch {
-    throw new Error('网络连接失败，请检查网络后重试')
+  for (let attempt = 0; ; attempt++) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 12000)
+    try {
+      response = await fetch(apiBase + path, {
+        method,
+        headers,
+        body: body == null ? undefined : JSON.stringify(body),
+        signal: controller.signal,
+      })
+    } catch {
+      clearTimeout(timer)
+      if (canRetry && attempt === 0) {
+        await new Promise((r) => setTimeout(r, 400))
+        continue
+      }
+      throw new Error('网络连接失败，请检查网络后重试')
+    }
+    clearTimeout(timer)
+    if (canRetry && attempt === 0 && response.status >= 500) {
+      await new Promise((r) => setTimeout(r, 400))
+      continue
+    }
+    break
   }
 
   const text = await response.text()
