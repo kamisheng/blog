@@ -1,5 +1,9 @@
 <template>
-  <div class="login-page">
+  <div class="login-page" :style="{ '--login-bg-blur': `${loginBgBlur}px` }">
+    <!-- 动态背景：极光光斑 + 网格 + 噪点 + 星点（不依赖任何图片） -->
+    <!-- 动态背景：WebGL 丝绸（SilkBackground 组件） -->
+    <SilkBackground tone="cool" />
+
     <section class="left-section" aria-label="品牌插画区域">
       <div class="logo-section">
         <a href="/" class="logo-link" aria-label="返回博客首页">
@@ -23,9 +27,6 @@
         <a href="/about/" class="footer-link">关于我</a>
       </div>
 
-      <div class="grid-overlay"></div>
-      <div class="blur-circle blur-circle-1"></div>
-      <div class="blur-circle blur-circle-2"></div>
     </section>
 
     <main class="right-section">
@@ -187,12 +188,28 @@
         </p>
       </div>
     </main>
+
+    <transition name="success-fade">
+      <div v-if="loginSuccess && successUser" class="login-success">
+        <div class="login-success-card">
+          <div ref="successAvatarRef" class="login-success-avatar" :class="{ empty: !successUser.avatar }">
+            <img v-if="successUser.avatar" :src="successUser.avatar" alt="" />
+            <span v-else>{{ successInitial }}</span>
+          </div>
+          <div class="login-success-copy">
+            <strong>登录成功</strong>
+            <span>{{ successName }}，正在进入博客…</span>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import AnimatedCharacters from './AnimatedCharacters.vue'
+import SilkBackground from './SilkBackground.vue'
 
 const apiBase = window.__BLOG_API_BASE__
   || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -211,6 +228,9 @@ const isTyping = ref(false)
 const isLoading = ref(false)
 const loginFailed = ref(false)
 const loginSuccess = ref(false)
+const loginBgBlur = ref(0)
+const successUser = ref(null)
+const successAvatarRef = ref(null)
 const errorMessage = ref('')
 const errors = ref({})
 const submitButtonRef = ref(null)
@@ -257,6 +277,11 @@ const setSubmitButtonTarget = (x, y) => {
 }
 
 const isRegister = computed(() => mode.value === 'register')
+const successName = computed(() => {
+  const u = successUser.value
+  return (u && (u.nickname || u.username)) || '你'
+})
+const successInitial = computed(() => String(successName.value).slice(0, 1).toUpperCase())
 const isSubmitReady = computed(() => {
   if (isRegister.value) {
     return /^[A-Za-z0-9_]{3,20}$/.test(username.value)
@@ -397,6 +422,122 @@ const callApi = async (path, body) => {
   return parseResponse(response)
 }
 
+let loginVirtualScroll = 0
+let loginTouchStartY = 0
+let loginBgFrame = 0
+
+const loginBlurThreshold = () => Math.min(window.innerHeight * 0.5, 240)
+
+const updateLoginBgBlur = () => {
+  loginBgFrame = 0
+  const threshold = loginBlurThreshold()
+  const scrollTop = Math.max(window.scrollY || window.pageYOffset || 0, loginVirtualScroll)
+  loginBgBlur.value = scrollTop >= threshold ? 15 : 0
+}
+
+const scheduleLoginBgBlur = () => {
+  if (loginBgFrame) return
+  loginBgFrame = window.requestAnimationFrame(updateLoginBgBlur)
+}
+
+const onLoginWheel = (event) => {
+  const threshold = loginBlurThreshold()
+  if (event.deltaY > 0) {
+    loginVirtualScroll = Math.min(loginVirtualScroll + event.deltaY, threshold * 2)
+  } else {
+    loginVirtualScroll = Math.max(0, loginVirtualScroll + event.deltaY)
+  }
+  scheduleLoginBgBlur()
+}
+
+const onLoginTouchStart = (event) => {
+  if (event.touches && event.touches.length) {
+    loginTouchStartY = event.touches[0].clientY
+  }
+}
+
+const onLoginTouchMove = (event) => {
+  if (!event.touches || !event.touches.length) return
+  const threshold = loginBlurThreshold()
+  const delta = loginTouchStartY - event.touches[0].clientY
+  loginVirtualScroll = Math.max(0, Math.min(delta, threshold * 2))
+  scheduleLoginBgBlur()
+}
+
+const goHome = () => {
+  const redirect = new URLSearchParams(window.location.search).get('redirect')
+  // 只接受站内路径，避免开放重定向
+  const safe = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/'
+  window.location.href = safe
+}
+
+const playSuccessFly = async () => {
+  const el = successAvatarRef.value
+  if (!el || !successUser.value) {
+    goHome()
+    return
+  }
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    goHome()
+    return
+  }
+
+  await nextTick()
+  const rect = el.getBoundingClientRect()
+  if (!rect.width) {
+    goHome()
+    return
+  }
+
+  const targetSize = 30
+  const scale = targetSize / rect.width
+  const navWidth = Math.min(window.innerWidth - 48, 1200)
+  const targetX = (window.innerWidth + navWidth) / 2 - (window.innerWidth < 768 ? 70 : 170)
+  const targetY = window.innerWidth < 768 ? 34 : 52
+  const dx = targetX - (rect.left + rect.width / 2)
+  const dy = targetY - (rect.top + rect.height / 2)
+
+  const animation = el.animate([
+    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+    {
+      transform: `translate(${dx * 0.74}px, ${dy * 0.74}px) scale(${scale * 1.14})`,
+      opacity: 1,
+      offset: 0.72,
+    },
+    {
+      transform: `translate(${dx}px, ${dy}px) scale(${scale})`,
+      opacity: 0.96,
+    },
+  ], {
+    duration: 1050,
+    easing: 'cubic-bezier(.2, .85, .25, 1)',
+    fill: 'forwards',
+  })
+
+  try {
+    await animation.finished
+  } catch (e) {
+    /* 动画被取消也继续跳转 */
+  }
+  goHome()
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', scheduleLoginBgBlur, { passive: true })
+  window.addEventListener('wheel', onLoginWheel, { passive: true })
+  window.addEventListener('touchstart', onLoginTouchStart, { passive: true })
+  window.addEventListener('touchmove', onLoginTouchMove, { passive: true })
+  updateLoginBgBlur()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', scheduleLoginBgBlur)
+  window.removeEventListener('wheel', onLoginWheel)
+  window.removeEventListener('touchstart', onLoginTouchStart)
+  window.removeEventListener('touchmove', onLoginTouchMove)
+  if (loginBgFrame) window.cancelAnimationFrame(loginBgFrame)
+})
+
 const handleSubmit = async () => {
   resetSubmitButton()
   if (!validateForm()) return
@@ -405,6 +546,7 @@ const handleSubmit = async () => {
   errorMessage.value = ''
   loginFailed.value = false
   loginSuccess.value = false
+  successUser.value = null
 
   try {
     const payload = isRegister.value
@@ -432,9 +574,9 @@ const handleSubmit = async () => {
 
     localStorage.setItem('token', payload.data.token)
     localStorage.setItem('user', JSON.stringify(payload.data.user))
-    setTimeout(() => {
-      window.location.href = '/'
-    }, 650)
+    successUser.value = payload.data.user
+    sessionStorage.setItem('blog-login-fly', '1')
+    setTimeout(playSuccessFly, 650)
   } catch (error) {
     errorMessage.value = error.message || '操作失败，请稍后再试'
     loginFailed.value = true
@@ -462,18 +604,29 @@ const handleSubmit = async () => {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    linear-gradient(135deg, rgba(8, 12, 24, 0.44), rgba(8, 12, 24, 0.18)),
-    url('/images/mm.jpg') center / cover no-repeat;
+  background: radial-gradient(120% 80% at 18% 0%, #151b36 0%, #0a0e1d 46%, #05070e 100%);
   pointer-events: none;
+}
+
+/* ---------- 背景遮罩与层级 ---------- */
+.login-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 70% at 20% 30%, rgba(4, 6, 16, 0.1), rgba(4, 6, 16, 0.62) 78%),
+    linear-gradient(100deg, rgba(4, 6, 16, 0.55), rgba(4, 6, 16, 0.28) 45%, rgba(4, 6, 16, 0.62));
 }
 
 .left-section {
   position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(90deg, rgba(8, 12, 24, 0.2), transparent 78%);
+  background: linear-gradient(90deg, rgba(6, 9, 18, 0.45), transparent 72%);
   padding: 3rem;
   color: white;
 }
@@ -536,30 +689,6 @@ const handleSubmit = async () => {
   color: #ffffff;
 }
 
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.4));
-}
-
-.blur-circle {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-}
-
-.blur-circle-1 {
-  top: 16%;
-  right: 10%;
-  width: 18rem;
-  height: 18rem;
-  background: rgba(45, 212, 191, 0.16);
-}
-
 .blur-circle-2 {
   bottom: 16%;
   left: 12%;
@@ -569,6 +698,8 @@ const handleSubmit = async () => {
 }
 
 .right-section {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -577,8 +708,18 @@ const handleSubmit = async () => {
 }
 
 .form-wrapper {
+  position: relative;
   width: 100%;
-  max-width: 430px;
+  max-width: 440px;
+  padding: 2.25rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 55%, rgba(124, 108, 255, 0.1));
+  box-shadow:
+    0 30px 80px rgba(3, 6, 18, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
 }
 
 .mobile-logo {
@@ -592,10 +733,11 @@ const handleSubmit = async () => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.25rem;
-  padding: 0.25rem;
+  padding: 0.3rem;
   margin-bottom: 2rem;
-  background: rgba(255, 255, 255, 0.14);
-  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
   backdrop-filter: blur(8px);
 }
 
@@ -626,8 +768,9 @@ const handleSubmit = async () => {
 .form-title {
   margin-bottom: 0.5rem;
   color: #ffffff;
-  font-size: 1.875rem;
+  font-size: 2rem;
   font-weight: 800;
+  letter-spacing: -0.015em;
   text-shadow: 0 3px 14px rgba(8, 12, 24, 0.5);
 }
 
@@ -651,27 +794,33 @@ const handleSubmit = async () => {
 }
 
 .form-label {
-  color: #374151;
-  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.78rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .form-input {
   width: 100%;
   height: 3rem;
   padding: 0 1rem;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
   outline: none;
-  color: #111827;
-  background: #ffffff;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .form-input:focus {
-  border-color: #3153d8;
-  box-shadow: 0 0 0 4px rgba(49, 83, 216, 0.1);
+  border-color: rgba(139, 124, 255, 0.95);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 4px rgba(124, 108, 255, 0.2);
 }
 
 .password-wrapper {
@@ -733,7 +882,7 @@ const handleSubmit = async () => {
 .checkbox {
   width: 1rem;
   height: 1rem;
-  accent-color: #3153d8;
+  accent-color: #7c6cff;
 }
 
 .forgot-link {
@@ -778,7 +927,9 @@ const handleSubmit = async () => {
   z-index: 1;
   border: 0;
   color: #ffffff;
-  background: #2847ba;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c6cff, #5d3fd3 62%, #4f46e5);
+  box-shadow: 0 16px 34px rgba(93, 63, 211, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.32);
   transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
   transform-style: preserve-3d;
   will-change: transform, box-shadow;
@@ -893,6 +1044,99 @@ const handleSubmit = async () => {
 
   .api-note {
     word-break: break-all;
+  }
+}
+
+/* 登录成功：头像飞入导航栏 */
+.login-success {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 10, 20, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.login-success-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px 18px 18px;
+  border-radius: 24px;
+  background: rgba(18, 24, 40, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  animation: successCardIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.login-success-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+.login-success-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.login-success-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.login-success-copy strong {
+  font-size: 18px;
+  letter-spacing: 0.01em;
+}
+.login-success-copy span {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.68);
+}
+.success-fade-enter-active,
+.success-fade-leave-active {
+  transition: opacity 0.22s ease;
+}
+.success-fade-enter-from,
+.success-fade-leave-to {
+  opacity: 0;
+}
+@keyframes successCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 520px) {
+  .login-success-card {
+    gap: 12px;
+    padding: 14px 18px 14px 14px;
+  }
+  .login-success-avatar {
+    width: 62px;
+    height: 62px;
+    font-size: 23px;
+  }
+  .login-success-copy strong {
+    font-size: 16px;
+  }
+  .login-success-copy span {
+    font-size: 12px;
   }
 }
 </style>

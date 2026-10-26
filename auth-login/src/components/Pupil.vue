@@ -42,10 +42,10 @@ const props = defineProps({
 })
 
 const pupilRef = ref(null)
-const mouseX = ref(0)
-const mouseY = ref(0)
+const mouseX = ref(null)
+const mouseY = ref(null)
 
-const handleMouseMove = (e) => {
+const handlePointerMove = (e) => {
   mouseX.value = e.clientX
   mouseY.value = e.clientY
 }
@@ -56,6 +56,10 @@ const pupilPosition = computed(() => {
   // If forced look direction is provided, use that instead of mouse tracking
   if (props.forceLookX !== undefined && props.forceLookY !== undefined) {
     return { x: props.forceLookX, y: props.forceLookY }
+  }
+
+  if (mouseX.value === null || mouseY.value === null) {
+    return { x: 0, y: 0 }
   }
 
   const pupil = pupilRef.value.getBoundingClientRect()
@@ -74,11 +78,13 @@ const pupilPosition = computed(() => {
 })
 
 onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('pointermove', handlePointerMove, { passive: true })
+  window.addEventListener('mousemove', handlePointerMove, { passive: true })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('pointermove', handlePointerMove)
+  window.removeEventListener('mousemove', handlePointerMove)
 })
 </script>
 

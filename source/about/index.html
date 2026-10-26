@@ -4,87 +4,10 @@ comments: false
 ---
 
 <style>
-/* 全屏入口遮罩 */
-.entry-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/images/bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  transition: opacity 0.8s ease, visibility 0.8s ease;
-}
-
-.entry-screen::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.55);
-  z-index: 1;
-}
-
-.entry-screen.hide {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.entry-text {
-  position: relative;
-  z-index: 2;
-  font-size: 2rem;
-  font-weight: 300;
-  letter-spacing: 4px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 2rem;
-  text-align: center;
-  animation: fadeInUp 0.8s ease;
-}
-
-.entry-btn {
-  position: relative;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.9rem 2.2rem;
-  font-size: 1.1rem;
-  font-weight: 500;
-  border-radius: 50px;
-  background: linear-gradient(135deg, #5D3FD3 0%, #7C3AED 100%);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(93, 63, 211, 0.3);
-  letter-spacing: 2px;
-}
-
-.entry-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(93, 63, 211, 0.4);
-  background: linear-gradient(135deg, #6D4FE3 0%, #8C4DED 100%);
-}
-
-.entry-btn:active {
-  transform: translateY(1px);
-}
-
-/* 主内容（初始隐藏） */
+/* 主内容（直接显示，不再有入口遮罩） */
 .about-content {
-  opacity: 0;
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
   transition: opacity 0.5s ease;
 }
 
@@ -559,14 +482,8 @@ comments: false
 }
 </style>
 
-<!-- 全屏入口遮罩 -->
-<div class="entry-screen" id="entryScreen">
-  <div class="entry-text">终于等到你了...</div>
-  <button class="entry-btn" id="enterBtn">✨ 进入 ✨</button>
-</div>
-
-<!-- 主内容（初始隐藏） -->
-<div class="about-content" id="aboutContent">
+<!-- 主内容 -->
+<div class="about-content visible" id="aboutContent">
   <div class="about-page">
     <div class="about-bg" id="aboutBg"></div>
     <div class="about-overlay"></div>
@@ -786,48 +703,18 @@ comments: false
     }
   }
   
-  // 显示内容并初始化特效的函数
+  // 页面挂载后直接初始化特效（原入口遮罩已移除）
   function showContentAndInit() {
-    var entryScreen = document.getElementById('entryScreen');
     var aboutContent = document.getElementById('aboutContent');
-    
-    if (entryScreen && aboutContent) {
-      entryScreen.classList.add('hide');
-      aboutContent.classList.add('visible');
-      setTimeout(initAboutEffects, 100);
-    }
+    if (!aboutContent) return;
+    aboutContent.classList.add('visible');
+    setTimeout(initAboutEffects, 100);
   }
   
-  // 使用事件委托监听按钮点击（解决 PJAX 后事件丢失问题）
-  document.addEventListener('click', function(e) {
-    var btn = e.target.closest('#enterBtn');
-    if (btn) {
-      e.preventDefault();
-      showContentAndInit();
-    }
-  });
-  
-  // 检查是否需要直接显示（如果已经进入过）
-  if (sessionStorage.getItem('about_entered')) {
-    showContentAndInit();
-  }
-  
-  // 监听 Redefine 主题的 PJAX 事件（页面切换后重新检查）
+  // 监听 Redefine 主题的页面切换事件（PJAX/swup 后重新挂载）
   function onPageSwitch() {
     window._aboutEffectsInited = false;
-    
-    var entryScreen = document.getElementById('entryScreen');
-    var aboutContent = document.getElementById('aboutContent');
-    
-    if (entryScreen && aboutContent) {
-      entryScreen.classList.remove('hide');
-      aboutContent.classList.remove('visible');
-      window._aboutEffectsInited = false;
-      
-      if (sessionStorage.getItem('about_entered')) {
-        showContentAndInit();
-      }
-    }
+    showContentAndInit();
   }
   
   document.addEventListener('pjax:complete', onPageSwitch);

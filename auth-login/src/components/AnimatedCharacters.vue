@@ -1,9 +1,5 @@
 <template>
   <div class="animated-characters-container">
-    <!-- Confetti -->
-    <div v-if="showConfetti" class="confetti-container">
-      <div v-for="(style, i) in confettiStyles" :key="i" class="confetti-piece" :style="style" />
-    </div>
     <!-- Purple tall rectangle character - Back layer -->
     <div
       ref="purpleRef"
@@ -303,35 +299,6 @@ const yellowPos = ref({ faceX: 0, faceY: 0, bodySkew: 0 })
 
 const isHidingPassword = computed(() => props.passwordLength > 0 && !props.showPassword)
 
-const confettiColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A78BFA', '#FF9B6B', '#6BCB77', '#4D96FF']
-const confettiStyles = ref([])
-const showConfetti = ref(false)
-let confettiTimeout = null
-
-const generateConfetti = () => {
-  confettiStyles.value = Array.from({ length: 180 }, (_, i) => {
-    const color = confettiColors[i % confettiColors.length]
-    return {
-      left: `${Math.random() * 100}%`,
-      top: `-${10 + Math.random() * 30}%`,
-      backgroundColor: color,
-      width: `${4 + Math.random() * 6}px`,
-      height: `${8 + Math.random() * 12}px`,
-      animationDelay: `${Math.random() * 2}s`,
-      animationDuration: `${4.5 + Math.random() * 2}s`,
-      transform: `rotate(${Math.random() * 360}deg)`,
-    }
-  })
-  showConfetti.value = true
-
-  // 清理confetti DOM元素，避免内存泄漏
-  if (confettiTimeout) clearTimeout(confettiTimeout)
-  confettiTimeout = setTimeout(() => {
-    showConfetti.value = false
-    confettiStyles.value = []
-  }, 8000) // 动画最长6.5秒，留1.5秒缓冲
-}
-
 const successLookY = ref(-5)
 let successLookAnimId = null
 
@@ -358,7 +325,6 @@ const animateSuccessLook = () => {
 
 watch(() => props.loginSuccess, (val) => {
   if (val) {
-    generateConfetti()
     successLookY.value = -5
     if (successLookAnimId) cancelAnimationFrame(successLookAnimId)
     animateSuccessLook()
@@ -550,7 +516,6 @@ onUnmounted(() => {
   if (peekTimeout) clearTimeout(peekTimeout)
   if (successLookAnimId) cancelAnimationFrame(successLookAnimId)
   if (rafId) cancelAnimationFrame(rafId)
-  if (confettiTimeout) clearTimeout(confettiTimeout)
 })
 </script>
 
@@ -797,33 +762,4 @@ onUnmounted(() => {
   border-radius: 0 0 16px 16px;
 }
 
-/* Confetti */
-.confetti-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: visible;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.confetti-piece {
-  position: absolute;
-  border-radius: 2px;
-  animation: confetti-fall linear forwards;
-}
-
-@keyframes confetti-fall {
-  0% {
-    translate: 0 0;
-    opacity: 1;
-  }
-  100% {
-    translate: 30px 200vh;
-    opacity: 1;
-    rotate: 720deg;
-  }
-}
 </style>

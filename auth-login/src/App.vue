@@ -1,10 +1,7 @@
 <template>
-  <LoginPage />
+  <LampLoginPage />
 </template>
 
 <script setup>
-import LoginPage from './components/LoginPage.vue'
+import LampLoginPage from './components/LampLoginPage.vue'
 </script>
-
-<style scoped>
-</style>

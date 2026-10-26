@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run build:auth && hexo generate",
+    "build": "npm run build:auth && npm run build:profile && npm run build:comments && hexo generate",
     "build:auth": "npm --prefix auth-login install && npm --prefix auth-login run build",
+    "build:profile": "npm --prefix profile-center install && npm --prefix profile-center run build",
+    "build:comments": "npm --prefix blog-comments install && npm --prefix blog-comments run build",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
     "auth:dev": "npm --prefix auth-login install && npm --prefix auth-login run dev",
+    "profile:dev": "npm --prefix profile-center install && npm --prefix profile-center run dev",
+    "comments:dev": "npm --prefix blog-comments install && npm --prefix blog-comments run dev",
     "server": "hexo server"
   },
   "hexo": {

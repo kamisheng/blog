@@ -71,10 +71,11 @@ const props = defineProps({
 })
 
 const eyeRef = ref(null)
-const mouseX = ref(0)
-const mouseY = ref(0)
+// 未收到指针事件前留空，避免按 (0,0) 计算导致瞳孔固定偏向左下
+const mouseX = ref(null)
+const mouseY = ref(null)
 
-const handleMouseMove = (e) => {
+const handlePointerMove = (e) => {
   mouseX.value = e.clientX
   mouseY.value = e.clientY
 }
@@ -85,6 +86,11 @@ const pupilPosition = computed(() => {
   // If forced look direction is provided, use that instead of mouse tracking
   if (props.forceLookX !== undefined && props.forceLookY !== undefined) {
     return { x: props.forceLookX, y: props.forceLookY }
+  }
+
+  // 还没收到任何指针位置时保持居中
+  if (mouseX.value === null || mouseY.value === null) {
+    return { x: 0, y: 0 }
   }
 
   const eye = eyeRef.value.getBoundingClientRect()
@@ -103,11 +109,14 @@ const pupilPosition = computed(() => {
 })
 
 onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove)
+  // pointermove 同时覆盖鼠标、触控板、手写笔和触屏拖动；mousemove 作为老浏览器兜底
+  window.addEventListener('pointermove', handlePointerMove, { passive: true })
+  window.addEventListener('mousemove', handlePointerMove, { passive: true })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('pointermove', handlePointerMove)
+  window.removeEventListener('mousemove', handlePointerMove)
 })
 </script>
 

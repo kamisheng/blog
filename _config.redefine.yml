@@ -53,17 +53,17 @@ global:
     chinese: 
       enable: true
       family: "Noto Sans SC, PingFang SC, Microsoft YaHei, sans-serif"
-      url: https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&amp;display=swap
+      url: https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@400;500;600;700&amp;display=swap
     
     english: 
       enable: true
       family: "Inter, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
-      url: https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;display=swap
+      url: https://fonts.googleapis.cn/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;display=swap
     
     title:
       enable: true
       family: "Playfair Display, Georgia, Times New Roman, serif"
-      url: https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&amp;display=swap
+      url: https://fonts.googleapis.cn/css2?family=Playfair+Display:wght@400;500;600;700&amp;display=swap
   # Content max width
   content_max_width: 1000px
   # Sidebar width
@@ -84,7 +84,7 @@ global:
     site_uv: true # site unique visitor
     post_pv: true # post page view
   # Whether to enable single page experience (using swup). See https://swup.js.org/. similar to pjax
-  single_page: false
+  single_page: true
   # Whether to enable Preloader.
   preloader:
     enable: true
@@ -101,7 +101,7 @@ global:
     description: Hexo Theme Redefine, Redefine Your Hexo Journey.
   # Google Analytics
   google_analytics:
-    enable: true # Whether to enable Google Analytics
+    enable: false # Whether to enable Google Analytics
     id:  "G-XMPJXEFLKH" # Google Analytics Measurement ID
 # SITE CUSTOMIZATION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end
     
