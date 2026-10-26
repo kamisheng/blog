@@ -358,8 +358,8 @@ articles:
 # COMMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start
 # Docs: https://redefine-docs.ohevan.com/posts/comment
 comment:
-  # Whether to enable comment
-  enable: true
+  # Whether to enable comment（本站用自建评论组件，主题自带 Waline 关闭）
+  enable: false
   # Comment system
   system: waline # waline, gitalk, twikoo, giscus, utterances, artalk
   # System configuration

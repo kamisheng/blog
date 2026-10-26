@@ -42,11 +42,29 @@
     var token = getToken();
     if (token) headers.Authorization = 'Bearer ' + token;
 
-    return fetch(apiBase() + path, {
-      method: method,
-      headers: headers,
-      body: options.body == null ? undefined : JSON.stringify(options.body)
-    }).then(
+    // CF→源站偶发 525/5xx（跨境隧道抖动），GET 幂等，重试一次；POST/DELETE 不重试
+    var canRetry = method === 'GET';
+    var attempt = 0;
+    function send() {
+      return fetch(apiBase() + path, {
+        method: method,
+        headers: headers,
+        body: options.body == null ? undefined : JSON.stringify(options.body)
+      }).then(function (res) {
+        if (canRetry && attempt === 0 && res.status >= 500) {
+          attempt++;
+          return new Promise(function (resolve) { setTimeout(resolve, 400); }).then(send);
+        }
+        return res;
+      }, function (err) {
+        if (canRetry && attempt === 0) {
+          attempt++;
+          return new Promise(function (resolve) { setTimeout(resolve, 400); }).then(send);
+        }
+        throw err;
+      });
+    }
+    return send().then(
       function (res) {
         return res.text().then(function (text) {
           var payload = {};
