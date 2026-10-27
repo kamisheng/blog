@@ -43,6 +43,7 @@
     if (token) headers.Authorization = 'Bearer ' + token;
 
     // CF→源站偶发 525/5xx（跨境隧道抖动），GET 幂等，重试一次；POST/DELETE 不重试
+    var MAX_TRIES = 3;
     var canRetry = method === 'GET';
     var attempt = 0;
     function send() {
@@ -51,15 +52,15 @@
         headers: headers,
         body: options.body == null ? undefined : JSON.stringify(options.body)
       }).then(function (res) {
-        if (canRetry && attempt === 0 && res.status >= 500) {
+        if (canRetry && attempt < MAX_TRIES - 1 && res.status >= 500) {
           attempt++;
-          return new Promise(function (resolve) { setTimeout(resolve, 400); }).then(send);
+          return new Promise(function (resolve) { setTimeout(resolve, attempt > 1 ? 900 : 400); }).then(send);
         }
         return res;
       }, function (err) {
-        if (canRetry && attempt === 0) {
+        if (canRetry && attempt < MAX_TRIES - 1) {
           attempt++;
-          return new Promise(function (resolve) { setTimeout(resolve, 400); }).then(send);
+          return new Promise(function (resolve) { setTimeout(resolve, attempt > 1 ? 900 : 400); }).then(send);
         }
         throw err;
       });

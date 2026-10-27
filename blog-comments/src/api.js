@@ -29,6 +29,7 @@ export async function request(path, { method = 'GET', body, auth = true } = {}) 
   if (auth && token) headers.Authorization = `Bearer ${token}`
 
   // CF→源站偶发 525/5xx（跨境隧道抖动），GET 幂等，重试一次再报错；POST/DELETE 不重试
+  const MAX_TRIES = 3
   const canRetry = method === 'GET'
   let response
   for (let attempt = 0; ; attempt++) {
@@ -39,14 +40,14 @@ export async function request(path, { method = 'GET', body, auth = true } = {}) 
         body: body == null ? undefined : JSON.stringify(body),
       })
     } catch (e) {
-      if (canRetry && attempt === 0) {
-        await new Promise((r) => setTimeout(r, 400))
+      if (canRetry && attempt < MAX_TRIES - 1) {
+        await new Promise((r) => setTimeout(r, attempt ? 900 : 400))
         continue
       }
       throw new Error('网络连接失败，请检查网络后重试')
     }
-    if (canRetry && attempt === 0 && response.status >= 500) {
-      await new Promise((r) => setTimeout(r, 400))
+    if (canRetry && attempt < MAX_TRIES - 1 && response.status >= 500) {
+      await new Promise((r) => setTimeout(r, attempt ? 900 : 400))
       continue
     }
     break
