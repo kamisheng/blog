@@ -218,6 +218,33 @@ const apiBase = window.__BLOG_API_BASE__ ||
     ? 'http://localhost:8080'
     : 'https://api.kamisheng.xyz')
 
+// CF→源站（跨境隧道）偶发 52x/5xx：这类错误说明请求没到后端，重试是安全的。
+// 但网络层异常（fetch 抛错）对注册接口不重试——服务端可能已成功，重试会变「用户名已存在」。
+const edgeFailure = (code) => code === 502 || code === 503 || code === 504 || (code >= 520 && code <= 525)
+
+async function postJson(path, payload, { retryOnThrow = false, tries = 3 } = {}) {
+  let lastErr = null
+  for (let attempt = 0; attempt < tries; attempt++) {
+    try {
+      const res = await fetch(apiBase + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      if (edgeFailure(res.status) && attempt < tries - 1) {
+        await new Promise((r) => setTimeout(r, attempt ? 900 : 400))
+        continue
+      }
+      return res
+    } catch (e) {
+      lastErr = e
+      if (!retryOnThrow || attempt === tries - 1) throw e
+      await new Promise((r) => setTimeout(r, attempt ? 900 : 400))
+    }
+  }
+  throw lastErr || new Error('request failed')
+}
+
 async function handleSubmit() {
   if (loading.value || dark.value) return
   errText.value = ''
@@ -237,14 +264,10 @@ async function handleSubmit() {
   btnKey.value = 'btnLoading'
   try {
     if (mode.value === 'register') {
-      const regRes = await fetch(apiBase + '/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: username.value.trim(),
-          email: email.value.trim(),
-          password: password.value
-        })
+      const regRes = await postJson('/api/auth/register', {
+        username: username.value.trim(),
+        email: email.value.trim(),
+        password: password.value
       })
       const regJson = await regRes.json().catch(() => ({}))
       if (!regRes.ok || regJson.code !== 200) {
@@ -259,15 +282,11 @@ async function handleSubmit() {
       return
     }
 
-    const res = await fetch(apiBase + '/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        account: username.value.trim(),
-        password: password.value,
-        rememberMe: !!remember.value
-      })
-    })
+    const res = await postJson('/api/auth/login', {
+      account: username.value.trim(),
+      password: password.value,
+      rememberMe: !!remember.value
+    }, { retryOnThrow: true })
     const json = await res.json().catch(() => ({}))
     if (!res.ok || json.code !== 200 || !json.data || !json.data.token) {
       throw new Error((json && json.message) || T.value.errWrong)

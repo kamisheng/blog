@@ -30,6 +30,8 @@ export async function request(path, { method = 'GET', body, auth = true } = {}) 
 
   // CF→源站偶发 525/5xx（跨境隧道抖动），GET 幂等，重试一次再报错；POST/DELETE 不重试
   const MAX_TRIES = 3
+  // CF→源站故障码：请求没到后端，重试安全（含 POST，比如登录）
+  const edgeFailure = (code) => code === 502 || code === 503 || code === 504 || (code >= 520 && code <= 525)
   const canRetry = method === 'GET'
   let response
   for (let attempt = 0; ; attempt++) {
@@ -46,7 +48,8 @@ export async function request(path, { method = 'GET', body, auth = true } = {}) 
       }
       throw new Error('网络连接失败，请检查网络后重试')
     }
-    if (canRetry && attempt < MAX_TRIES - 1 && response.status >= 500) {
+    const retryThis = canRetry ? response.status >= 500 : edgeFailure(response.status)
+    if (retryThis && attempt < MAX_TRIES - 1) {
       await new Promise((r) => setTimeout(r, attempt ? 900 : 400))
       continue
     }

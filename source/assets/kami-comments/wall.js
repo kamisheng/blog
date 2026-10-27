@@ -44,6 +44,7 @@
 
     // CF→源站偶发 525/5xx（跨境隧道抖动），GET 幂等，重试一次；POST/DELETE 不重试
     var MAX_TRIES = 3;
+    var edgeFailure = function (code) { return code === 502 || code === 503 || code === 504 || (code >= 520 && code <= 525); };
     var canRetry = method === 'GET';
     var attempt = 0;
     function send() {
@@ -52,7 +53,7 @@
         headers: headers,
         body: options.body == null ? undefined : JSON.stringify(options.body)
       }).then(function (res) {
-        if (canRetry && attempt < MAX_TRIES - 1 && res.status >= 500) {
+        if ((canRetry ? res.status >= 500 : edgeFailure(res.status)) && attempt < MAX_TRIES - 1) {
           attempt++;
           return new Promise(function (resolve) { setTimeout(resolve, attempt > 1 ? 900 : 400); }).then(send);
         }
