@@ -376,8 +376,11 @@
     function buildReplyEditor(comment) {
       var box = el('div', 'gb-reply');
       var head = el('div', 'gb-reply-head');
-      head.appendChild(document.createTextNode('回复 '));
+      head.appendChild(el('span', 'gb-reply-tolabel', '回复'));
       head.appendChild(el('b', null, '@' + displayName(comment.user)));
+      // 字数放标题行：卡片在 3 列布局下很窄，放 foot 会和按钮挤在一起溢出
+      var counter = el('span', 'gb-counter', '0 / ' + MAX_LEN);
+      head.appendChild(counter);
       box.appendChild(head);
 
       var ta = document.createElement('textarea');
@@ -386,8 +389,6 @@
       box.appendChild(ta);
 
       var foot = el('div', 'gb-reply-foot');
-      var counter = el('span', 'gb-counter', '0 / ' + MAX_LEN);
-      foot.appendChild(counter);
       var cancel = el('button', 'gb-btn ghost small', '取消');
       cancel.type = 'button';
       foot.appendChild(cancel);

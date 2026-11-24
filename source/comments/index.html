@@ -112,7 +112,7 @@ comment: false
   line-height: 1.7;
 }
 .gb-reply textarea {
-  min-height: 64px;
+  min-height: 52px;
 }
 .gb-editor textarea::placeholder,
 .gb-reply textarea::placeholder {
@@ -128,6 +128,7 @@ comment: false
   margin-right: auto;
   color: var(--gb-muted);
   font-size: 12px;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .gb-counter.is-warn {
@@ -383,28 +384,44 @@ comment: false
   border-top: 0;
 }
 .gb-reply {
-  margin: 12px 0 0;
-  padding: 12px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
   border: 1.5px solid var(--gb-line);
   border-radius: 12px;
   background: var(--gb-chip);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .gb-reply-head {
-  margin-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
   color: var(--gb-soft);
   font-size: 13px;
 }
+.gb-reply-head .gb-counter {
+  margin: 0 0 0 auto;
+  font-size: 11.5px;
+}
+.gb-reply-tolabel {
+  flex: none;
+  white-space: nowrap;
+}
 .gb-reply-head b {
+  min-width: 0;
+  overflow: hidden;
   color: var(--gb-brand);
   font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .gb-reply-foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 /* ---------- 状态 / 更多 ---------- */
