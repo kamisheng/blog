@@ -559,9 +559,11 @@ comments: false
 
     if (avatarWrap && avatar) {
       var triggerAvatarSpin = function() {
-        avatar.classList.remove('spin-burst');
-        void avatar.offsetWidth;
+        // 动画进行中不重复触发：hover 抖动会连续 enter/leave，反复重放等于转不起来
+        if (avatar.classList.contains('spin-burst')) return;
         avatar.classList.add('spin-burst');
+        // 兜底：系统开启「减少动态效果」时不会有 animationend，避免类名残留
+        setTimeout(function() { avatar.classList.remove('spin-burst'); }, 800);
       };
 
       avatarWrap.addEventListener('mouseenter', triggerAvatarSpin);
@@ -672,22 +674,45 @@ comments: false
     }
     
     // 3D 倾斜卡片
-    if (!isMobile && card) {
-      card.addEventListener('mousemove', function(e) {
-        var rect = card.getBoundingClientRect();
-        var x = e.clientX - rect.left;
-        var y = e.clientY - rect.top;
-        var centerX = rect.width / 2;
-        var centerY = rect.height / 2;
-        var rotateY = ((x - centerX) / centerX) * 4.5;
-        var rotateX = ((centerY - y) / centerY) * 4.5;
+    if (!isMobile && card && page) {
+      var tiltHost = document.querySelector('.about-inner');
+      var tiltOn = false;
+      // 角度必须用「未变换的布局坐标」算：卡片自己带 transform，
+      // getBoundingClientRect 会跟着转/位移变化，拿它算角度会形成
+      // 「角度变 → 卡片动 → 角度再变」的反馈，表现为边框抖动、头像 hover 反复进出。
+      var cardBox = function() {
+        if (!tiltHost) return null;
+        var hostRect = tiltHost.getBoundingClientRect();
+        return {
+          left: hostRect.left + tiltHost.clientLeft + card.offsetLeft,
+          top: hostRect.top + tiltHost.clientTop + card.offsetTop,
+          width: card.offsetWidth,
+          height: card.offsetHeight
+        };
+      };
+      var resetTilt = function() {
+        if (!tiltOn) return;
+        tiltOn = false;
+        card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0)';
+        card.style.boxShadow = '0 18px 45px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.14)';
+      };
+      page.addEventListener('mousemove', function(e) {
+        var box = cardBox();
+        if (!box) return;
+        if (e.clientX < box.left || e.clientX > box.left + box.width ||
+            e.clientY < box.top || e.clientY > box.top + box.height) {
+          resetTilt();
+          return;
+        }
+        var centerX = box.left + box.width / 2;
+        var centerY = box.top + box.height / 2;
+        var rotateY = ((e.clientX - centerX) / (box.width / 2)) * 4.5;
+        var rotateX = ((centerY - e.clientY) / (box.height / 2)) * 4.5;
+        tiltOn = true;
         card.style.transform = 'perspective(1200px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-2px)';
         card.style.boxShadow = '0 24px 50px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255,255,255,0.16)';
       });
-      card.addEventListener('mouseleave', function() {
-        card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0)';
-        card.style.boxShadow = '0 18px 45px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.14)';
-      });
+      page.addEventListener('mouseleave', resetTilt);
     }
     
     // 底部引用动画
