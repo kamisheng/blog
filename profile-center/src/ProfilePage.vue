@@ -18,7 +18,7 @@
       <template v-else>
         <section class="profile-card">
           <div class="avatar-ring">
-            <img v-if="avatarUrl && !avatarBroken" :src="avatarUrl" alt="头像" @error="avatarBroken = true" />
+            <img v-if="avatarUrl && !avatarBroken" :src="avatarUrl" alt="头像" class="not-markdown" @error="avatarBroken = true" />
             <span v-else class="avatar-fallback">{{ initial }}</span>
           </div>
 
@@ -325,6 +325,7 @@ onMounted(load)
 .avatar-fallback {
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
   border-radius: 50%;
   display: block;
   object-fit: cover;
