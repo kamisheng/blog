@@ -313,11 +313,11 @@ onMounted(load)
   top: 24px;
 }
 .avatar-ring {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 14px;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
   border-radius: 50%;
-  padding: 4px;
+  padding: 3px;
   background: linear-gradient(135deg, var(--primary-color, #2847ba), #4c6ef5, #2dd4bf);
   box-shadow: 0 12px 24px rgba(40, 71, 186, 0.22);
 }
@@ -329,14 +329,13 @@ onMounted(load)
   border-radius: 50%;
   display: block;
   object-fit: cover;
-  border: 3px solid #fff;
   background: var(--third-background-color, #eef2ff);
 }
 .avatar-fallback {
   display: grid;
   place-items: center;
   color: var(--primary-color, #2847ba);
-  font-size: 34px;
+  font-size: 44px;
   font-weight: 800;
 }
 .display-name {
