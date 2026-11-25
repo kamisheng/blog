@@ -98,7 +98,7 @@ comments: false
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 78px 20px 54px;
+  padding: 72px 20px;
   transition: opacity 0.45s var(--arc-ease);
 }
 .arc-cover.is-gone { opacity: 0; pointer-events: none; }
@@ -115,10 +115,10 @@ comments: false
 .arc.is-opening .arc-dossier { display: block; }
 .arc-cover.is-hidden { display: none; }
 .arc-env-wrap {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 26px;
 }
 
 .arc-env {
@@ -345,15 +345,20 @@ comments: false
 
 /* ---------- 撕封提示 ---------- */
 .arc-hint {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 22px);
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
   font-size: 13px;
   letter-spacing: 0.3em;
   color: rgba(255, 224, 184, 0.72);
+  transform: translateX(-50%);
   transition: opacity 0.35s var(--arc-ease), transform 0.35s var(--arc-ease);
 }
-.arc-hint.is-gone { opacity: 0; transform: translateY(8px); }
+.arc-hint.is-gone { opacity: 0; transform: translateX(-50%) translateY(8px); }
 .arc-hint i {
   position: relative;
   width: 15px;
@@ -389,7 +394,7 @@ comments: false
   position: relative;
   z-index: 4;
   display: none;
-  padding: 58px 18px 80px;
+  padding: 64px 18px;
   opacity: 0;
 }
 .arc-dossier.is-show { display: block; opacity: 1; animation: arcSheetIn 0.7s var(--arc-ease) both; }
@@ -862,8 +867,7 @@ comments: false
 /* ---------- 移动端 ---------- */
 @media (max-width: 720px) {
   .arc { margin: -1rem auto 0; border-radius: 16px; }
-  .arc-cover { min-height: calc(100vh - 130px); padding: 66px 16px 40px; }
-  .arc-env-wrap { gap: 20px; }
+  .arc-cover { min-height: calc(100vh - 130px); padding: 56px 16px; }
   .arc-env { width: min(330px, 84vw); }
   .arc-env-body { padding: 20px 22px 16px; }
   .arc-env-kind { font-size: 16px; letter-spacing: 0.32em; margin-bottom: 10px !important; }
@@ -872,7 +876,7 @@ comments: false
   .arc-env-label { top: 40px; right: -6px; font-size: 9.5px; }
   .arc-hint { font-size: 12px; letter-spacing: 0.24em; }
 
-  .arc-dossier { padding: 40px 10px 64px; }
+  .arc-dossier { padding: 46px 10px 52px; }
   .arc-sheet { padding: 24px 15px 20px; transform: none; }
   .arc-head { flex-direction: column; gap: 16px; }
   .arc-photo { width: 108px; margin-top: 2px; }
@@ -1320,6 +1324,17 @@ comments: false
   /* ---------------- 撕封条 ---------------- */
   var torn = false;
 
+  // 首屏场景铺到视口底部，信封在整屏里垂直居中（不同窗口高度都成立）
+  function fitCover() {
+    if (torn) return;
+    var top = root.getBoundingClientRect().top + window.pageYOffset;
+    var vh = document.documentElement.clientHeight || window.innerHeight;
+    cover.style.minHeight = Math.max(430, vh - top) + 'px';
+  }
+  fitCover();
+  window.addEventListener('resize', fitCover);
+  window.addEventListener('load', fitCover);
+
   function waxHalves() {
     ['l', 'r'].forEach(function (side) {
       var d = document.createElement('div');
@@ -1340,12 +1355,12 @@ comments: false
     if (!reduce) burst();
 
     root.classList.add('is-opening');
+    cover.style.minHeight = '';
     setTimeout(function () {
       dossier.classList.add('is-show');
     }, 300);
     setTimeout(function () {
       cover.classList.add('is-gone');
-      window.scrollTo({ top: 0, behavior: 'auto' });
     }, 900);
     setTimeout(function () {
       cover.classList.add('is-hidden');
@@ -1355,20 +1370,26 @@ comments: false
   hint.addEventListener('click', tear);
 
   var startY = null;
+  function releaseSeal(e) {
+    if (seals.hasPointerCapture && seals.hasPointerCapture(e.pointerId)) {
+      seals.releasePointerCapture(e.pointerId);
+    }
+  }
   seals.addEventListener('pointerdown', function (e) {
     startY = e.clientY;
     if (seals.setPointerCapture) seals.setPointerCapture(e.pointerId);
   });
   seals.addEventListener('pointermove', function (e) {
     if (startY === null) return;
-    if (startY - e.clientY > 42) { startY = null; tear(); }
+    if (startY - e.clientY > 42) { startY = null; releaseSeal(e); tear(); }
   });
-  seals.addEventListener('pointerup', function () {
+  seals.addEventListener('pointerup', function (e) {
+    releaseSeal(e);
     if (startY === null) return;
     startY = null;
     tear();
   });
-  seals.addEventListener('pointercancel', function () { startY = null; });
+  seals.addEventListener('pointercancel', function (e) { startY = null; releaseSeal(e); });
   seals.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tear(); }
   });
@@ -1378,6 +1399,7 @@ comments: false
     dossier.classList.remove('is-show');
     cover.classList.remove('is-gone', 'is-hidden');
     root.classList.remove('is-opening');
+    fitCover();
     window.scrollTo({ top: 0, behavior: 'auto' });
     setTimeout(function () {
       torn = false;
