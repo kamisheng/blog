@@ -68,7 +68,9 @@ comments: false
 
 .text-panel {
   position: relative;
-  width: min(680px, 92%);
+  width: min(760px, 94%);
+  max-width: 100%;
+  min-width: 0;
   padding: 3rem 2.2rem;
   border-radius: 30px;
   background: rgba(255, 255, 255, 0.08);
@@ -262,17 +264,427 @@ comments: false
   animation: caretBlink 0.9s steps(1) infinite;
 }
 
-.profile-text {
+/* ── 液态玻璃档案卡 ───────────────────── */
+.char-card {
   position: relative;
   z-index: 2;
+  isolation: isolate;
   margin-top: 1.6rem;
+  padding: 1.35rem 1.4rem 1.15rem;
+  border-radius: 24px;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.46) 0%,
+    rgba(228, 240, 255, 0.22) 42%,
+    rgba(255, 255, 255, 0.38) 100%
+  );
+  -webkit-backdrop-filter: blur(22px) saturate(200%) brightness(1.06);
+  backdrop-filter: blur(22px) saturate(200%) brightness(1.06);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 26px 60px -18px rgba(20, 36, 76, 0.4),
+    0 4px 14px rgba(20, 36, 76, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 18px 34px -26px rgba(255, 172, 208, 0.7),
+    inset 0 -20px 36px -26px rgba(138, 176, 255, 0.75);
+  color: #1c2437;
+  font-size: 0.9rem;
+  line-height: 1.95;
+  text-align: left;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  animation: cardIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-.profile-text p {
-  margin: 0.8rem 0;
-  line-height: 2;
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 折射色斑与镜面高光 */
+.char-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(52% 42% at 16% -4%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(42% 36% at 88% 4%, rgba(150, 190, 255, 0.5), rgba(150, 190, 255, 0) 72%),
+    radial-gradient(48% 40% at 76% 98%, rgba(255, 170, 205, 0.42), rgba(255, 170, 205, 0) 74%),
+    linear-gradient(118deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 26%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.42) 100%);
+}
+
+/* 缓慢掠过的镜面高光 */
+.char-card::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: -60%;
+  width: 34%;
+  z-index: -1;
+  pointer-events: none;
+  transform: rotate(14deg);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(14px);
+  animation: glassSheen 14s ease-in-out infinite;
+}
+
+@keyframes glassSheen {
+  0%, 62% { left: -60%; opacity: 0; }
+  70% { opacity: 0.85; }
+  96%, 100% { left: 130%; opacity: 0; }
+}
+
+.char-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #151c2e;
+}
+
+.char-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.45rem;
+}
+
+.char-meta span {
+  padding: 0.06rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(28, 44, 82, 0.06);
+  font-size: 0.74rem;
+  line-height: 1.7;
+  color: #37415a;
+}
+
+.char-meta b {
+  margin-right: 0.3rem;
+  font-weight: 400;
+  color: #7c87a3;
+}
+
+.char-sec {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 1.15rem 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #5b6a8d;
+}
+
+.char-sec::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6aa8ff, #b98bff);
+  box-shadow: 0 0 8px rgba(106, 168, 255, 0.75);
+}
+
+.char-sec::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(60, 90, 150, 0.18), transparent);
+}
+
+.char-stats,
+.char-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.char-stat {
+  display: grid;
+  grid-template-columns: 3em 3.2em minmax(46px, 1fr) 1.6fr;
+  gap: 0 0.7rem;
+  align-items: center;
+  padding: 0.12rem 0.35rem;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.char-stat:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.char-sname {
+  font-weight: 700;
+  color: #1c2437;
+}
+
+.char-sval {
+  font-size: 0.8rem;
+  color: #4a5b85;
+  font-variant-numeric: tabular-nums;
+}
+
+.char-bar {
+  position: relative;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(40, 60, 110, 0.12);
+  box-shadow: inset 0 1px 2px rgba(40, 60, 110, 0.18);
+  overflow: hidden;
+}
+
+.char-bar i {
+  display: block;
+  width: calc(var(--p) * 1%);
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--c), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 0 10px -1px var(--c);
+  animation: barGrow 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes barGrow {
+  from { width: 0; }
+}
+
+.char-note {
+  min-width: 0;
+  font-size: 0.79rem;
+  color: #465270;
+  word-break: break-word;
+}
+
+.char-stat:hover .char-sval {
+  animation: charGlitch 0.32s steps(2) 1;
+}
+
+@keyframes charGlitch {
+  50% { transform: translateX(2px); text-shadow: 2px 0 rgba(255, 45, 85, 0.55), -2px 0 rgba(41, 231, 255, 0.6); }
+}
+
+.char-row {
+  display: flex;
+  gap: 0.85rem;
+  align-items: baseline;
+}
+
+.char-row + .char-row {
+  margin-top: 0.15rem;
+}
+
+.char-k {
+  flex: none;
+  width: 4.6em;
+  color: #6c7794;
+}
+
+.char-v {
+  flex: 1;
+  min-width: 0;
+  color: #364159;
+  word-break: break-word;
+}
+
+.char-rings {
+  margin-top: 0.4rem;
+}
+
+.char-ring-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.char-ring-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25) 38%, rgba(255, 255, 255, 0) 58%),
+    var(--ring, #6b7280);
+  box-shadow:
+    0 4px 10px -2px rgba(28, 44, 82, 0.32),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font: 700 0.62rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.char-ring-btn:hover {
+  transform: translateY(-2px);
+}
+
+.char-ring-btn.on {
+  transform: scale(1.14);
+  box-shadow:
+    0 6px 16px -2px rgba(28, 44, 82, 0.38),
+    0 0 0 3px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.char-ring-btn.is-nine {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2) 40%, rgba(255, 255, 255, 0) 60%),
+    conic-gradient(from 0deg, #ff5c5c, #ffb45c, #f2ff5c, #5cff8f, #5ce6ff, #6b7dff, #c45cff, #ff5cd0, #ff5c5c);
+  animation: nineShift 12s linear infinite;
+}
+
+@keyframes nineShift {
+  to { filter: hue-rotate(360deg); }
+}
+
+.char-ring-panel {
+  margin-top: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-left: 3px solid var(--ring, #7aa2ff);
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 20px -12px rgba(28, 44, 82, 0.4);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.char-ring-view {
+  display: none;
+  animation: viewIn 0.3s ease both;
+}
+
+.char-ring-view.on {
+  display: block;
+}
+
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+.char-ring-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #151c2e;
+  word-break: break-word;
+}
+
+.char-rskill {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.82rem;
+  color: #4a5b85;
+  word-break: break-word;
+}
+
+.char-ring-body {
+  margin-top: 0.45rem;
+  font-size: 0.8rem;
+  line-height: 1.85;
+  color: #3d4864;
+}
+
+.char-ring-body b {
+  color: #1b2333;
+}
+
+.char-list li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.char-list li + li {
+  margin-top: 0.2rem;
+}
+
+.char-list li::before {
+  content: "·";
+  flex: none;
   font-size: 1rem;
-  color: #000;
+  line-height: 1;
+  color: #93a0bd;
+}
+
+.char-tag {
+  flex: none;
+  font-weight: 700;
+  color: #1b2333;
+}
+
+.char-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1.2rem;
+}
+
+.char-anime {
+  margin-top: 0.9rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+.char-anime > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #4a5b85;
+  cursor: pointer;
+  list-style: none;
+}
+
+.char-anime > summary::-webkit-details-marker {
+  display: none;
+}
+
+.char-anime > summary::after {
+  content: "＋";
+  margin-left: auto;
+  color: #93a0bd;
+}
+
+.char-anime[open] > summary::after {
+  content: "－";
+}
+
+.char-anime-body {
+  padding: 0 0.85rem 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.95;
+  color: #465270;
+  word-break: break-word;
+}
+
+.char-foot {
+  margin-top: 1.1rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed rgba(60, 90, 150, 0.18);
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+  color: #66728d;
 }
 
 .profile-actions {
@@ -452,7 +864,14 @@ comments: false
   .text-panel { width: min(640px, 100%); padding: 1.8rem 1.3rem; }
   .panel-watermark { font-size: 3.2rem; top: 18px; right: 16px; }
   .profile-name { font-size: 2.2rem; }
-  .profile-subtitle, .profile-text, .bottom-quote { text-align: center; }
+  .char-stat { grid-template-columns: 2.8em 2.9em 1fr; font-size: 0.79rem; column-gap: 0.45rem; }
+  .char-bar { display: none; }
+  .char-note { font-size: 0.76rem; }
+  .char-card { padding: 0.95rem 0.8rem 0.8rem; }
+  .char-cols { grid-template-columns: 1fr; gap: 0; }
+  .char-ring-btn { width: 30px; height: 30px; }
+  .char-sec { margin: 1rem 0 0.5rem; }
+  .profile-subtitle, .bottom-quote { text-align: center; }
   .profile-actions { justify-content: center; }
   .profile-btn::after, .power-btn::after { display: none; }
   .power-preview { width: 140px; bottom: calc(100% + 14px); }
@@ -461,13 +880,14 @@ comments: false
 @media (prefers-reduced-motion: reduce) {
   .text-panel, .bottom-quote, .avatar-wave, .profile-avatar-wrap::before,
   .profile-avatar-wrap::after, .profile-status-dot, .typing-caret,
-  .profile-avatar, .profile-avatar.spin-burst {
+  .profile-avatar, .profile-avatar.spin-burst,
+  .char-card, .char-card::after, .char-bar i, .char-ring-btn.is-nine {
     animation: none !important;
     transition: none !important;
   }
 }
 
-.text-panel, .profile-name, .profile-subtitle, .profile-text p,
+.text-panel, .profile-name, .profile-subtitle,
 .profile-badge, .meta-chip, .profile-btn, .profile-btn i,
 .power-btn, .power-btn i, .bottom-quote p, .typing-text {
   color: #000 !important;
@@ -512,12 +932,192 @@ comments: false
           <span class="typing-text" id="typingText"></span><span class="typing-caret"></span>
         </p>
 
-        <div class="profile-text">
-          <p>这个blog主要是为了分享些我的笔记或是邪修，作为一个时光胶囊吧(｡◕‿◕｡)</p>
-          <p>这篇blog被制作的时候我还是一位大一下的大学生，水平不高(｡>﹏<｡)，有诸多做的不好的地方请见谅</p>
-          <p>主播看过的动漫(只是看过的,不一定推荐你们去看啊)：(๑˃ᴗ˂)ﻭ <br><br>声之形，你的名字，天气之子，朝花夕誓，你好世界，言叶之庭，我想吃掉你的胰脏，青春猪头少年不会梦到兔女郎学姐，埃罗芒阿老师，国家队，五等分的新娘，总之就是非常可爱，堀与宫村，无职转生，剃须，更衣人偶坠入爱河，擅长捉弄的高木同学，租借女友，我叫白小飞，馒头日记，全职法师，全职高手，我能看到成功率，刺客567，暴击枪手之ak西游，我的逆天神器，魁拔，狠西游，中二病也要谈恋爱，我的青春恋爱物语果然有问题，魔女之旅，可塑性记忆，夏洛特，小林家的龙女仆，萤火之森，因为怕疼就全点防御了，紫罗兰永恒花园，未闻花名，欢迎来到实力至上主义教室，异度侵入，这个勇者明明超强却过分慎重，青梅竹马是消防员，宇崎酱想要玩耍，青酱不能学习，关于我转生成为史莱姆这档事，大护法，辉夜大小姐想让我告白，秒速五厘米，盾之勇者成名录，国王排名，打了300年的史莱姆不知不觉就练到了满级，四月是你的谎言，玉子市场，徒然喜欢你，阿拉德宿命之门，鬼灭之刃，从零开始的异世界生活，境界的彼方，终末的后宫，羁绊者，心灵代码，测不准的阿波连同学，千绪的上学路，回复术士的重启人生，赛马娘，十万个冷笑话，工作细胞，理科生坠入情网，家有女友，借东西的小人阿莉埃蒂，精灵幻想记，用我的手指搅乱，带着智能手机闯荡异世界，间谍过家家，史上最强大魔王转生为村民A，千与千寻，明月守护者，OVERLORD，多罗罗，转生成蜘蛛又怎样，进击的巨人，CLANNAD，天降女子，洗屋先生，僧侣之夜，打工吧魔王大人，式守同学不止可爱而已，七大罪，缘の空，女神宿舍管理员，一拳超人，坠落的天使，狂赌之渊，继母的拖油瓶是我前女友，冷面天使，古见同学有交流障碍症，彼得格里尔的贤者时间，overflow，东京喰种，在异世界迷宫开后宫，若能与你共乘海浪之上，影之实力者，火影忍者，灵能百分百，日在校园，金装的维尔梅，漆黑的子弹，转生成为魔剑，邻座的怪同学，命运石之门，电锯人，想哭的我带上了猫的面具，在下坂田有何贵干，政宗君的复仇，铃芽户缔，石纪元，卡巴内，冰海战记，物理魔法使马修，一人之下，刀剑神域，无颜之月，斩赤红之瞳，寄生兽，X龙时代，大王饶命，通往夏天的隧道，死亡笔记，夏日重现，我独自升级</p>
+        <!-- 角色卡 -->
+        <div class="char-card">
+
+          <div class="char-title">kami</div>
+
+          <div class="char-meta">
+            <span><b>职业</b>学生</span>
+            <span><b>种族</b>类人猿</span>
+            <span><b>出生地</b>地球🌍Online</span>
+            <span><b>等级</b>Lv.1</span>
+          </div>
+
+          <div class="char-sec">参数</div>
+          <ul class="char-stats">
+            <li class="char-stat" style="--p:10;--c:#5b8cff">
+              <span class="char-sname">体力</span><span class="char-sval">1/10</span>
+              <span class="char-bar"><i></i></span>
+              <span class="char-note">很累很累</span>
+            </li>
+            <li class="char-stat" style="--p:0;--c:#7b8fae">
+              <span class="char-sname">智力</span><span class="char-sval">？/10</span>
+              <span class="char-bar"><i></i></span>
+              <span class="char-note">不详</span>
+            </li>
+            <li class="char-stat" style="--p:30;--c:#45d6a4">
+              <span class="char-sname">敏捷</span><span class="char-sval">3/10</span>
+              <span class="char-bar"><i></i></span>
+              <span class="char-note">deadline 前 24 小时才起飞</span>
+            </li>
+            <li class="char-stat" style="--p:50;--c:#ff7bb0">
+              <span class="char-sname">魅力</span><span class="char-sval">5/10</span>
+              <span class="char-bar"><i></i></span>
+              <span class="char-note">语音房里三句话之后开始讲 Redis</span>
+            </li>
+            <li class="char-stat" style="--p:20;--c:#ffb347">
+              <span class="char-sname">幸运</span><span class="char-sval">2/10</span>
+              <span class="char-bar"><i></i></span>
+              <span class="char-note">第一次上线就撞上 Cloudflare 525</span>
+            </li>
+            <li class="char-stat" style="--p:90;--c:#b16bff">
+              <span class="char-sname">邪修</span><span class="char-sval">9/10</span>
+              <span class="char-bar"><i></i></span>
+              <span class="char-note">都是经验来的</span>
+            </li>
+          </ul>
+
+          <div class="char-sec">武魂</div>
+          <div class="char-meta">
+            <span><b>武魂</b>域枢巡检</span>
+            <span><b>定位</b>强攻强控 · 持续流爆发 · 杀伐系</span>
+            <span><b>魂环</b>黑 黑 红 红 红 橙金 暗金 绿金 九彩</span>
+          </div>
+
+          <div class="char-rings">
+            <div class="char-ring-nav">
+              <button class="char-ring-btn" type="button" data-i="0" style="--ring:#3d3d47">01</button>
+              <button class="char-ring-btn" type="button" data-i="1" style="--ring:#3d3d47">02</button>
+              <button class="char-ring-btn" type="button" data-i="2" style="--ring:#c62828">03</button>
+              <button class="char-ring-btn" type="button" data-i="3" style="--ring:#c62828">04</button>
+              <button class="char-ring-btn" type="button" data-i="4" style="--ring:#c62828">05</button>
+              <button class="char-ring-btn" type="button" data-i="5" style="--ring:#d98b16">06</button>
+              <button class="char-ring-btn" type="button" data-i="6" style="--ring:#8a6a12">07</button>
+              <button class="char-ring-btn" type="button" data-i="7" style="--ring:#3f9d3f">08</button>
+              <button class="char-ring-btn is-nine" type="button" data-i="8">09</button>
+            </div>
+
+            <div class="char-ring-panel">
+              <div class="char-ring-view" data-i="0">
+                <div class="char-ring-name">第一魂环｜万年黑环【链路破击】</div>
+                <span class="char-rskill">报错溯源斩</span>
+                <div class="char-ring-body"><b>效果：</b>目光扫过，直接锁定敌人力量链路里的薄弱节点，一击直击破绽；被命中目标挂上【异常标记】，后续所有攻击对标记目标持续增伤。<br><b>被动：</b>一眼看穿对方招式漏洞。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="1">
+                <div class="char-ring-name">第二魂环｜万年黑环【白名单锢锁】</div>
+                <span class="char-rskill">权限封禁链</span>
+                <div class="char-ring-body"><b>效果：</b>甩出暗蓝色数据流锁链捆缚目标。被锁者难以调动自身力量释放高阶技能，锁链持续灼烧魂力，可随时收紧爆发伤害。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="2">
+                <div class="char-ring-name">第三魂环｜十万年红环【镜像沙核】</div>
+                <span class="char-rskill">Mock 幻骸</span>
+                <div class="char-ring-body"><b>效果：</b>生成一具镜像分身，分身能够释放前两魂技。分身承载独立的力量实例，崩碎之时炸开紊乱数据流冲击敌人。最多同时存在 2 具。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="3">
+                <div class="char-ring-name">第四魂环｜十万年红环【驱动崩解】</div>
+                <span class="char-rskill">范式冲突刃</span>
+                <div class="char-ring-body"><b>效果：</b>凝聚数据流刀刃斩击，命中后给敌人挂上【版本冲突】debuff。敌人招式运转持续失序，威力衰减、魂力不断流失，可撕碎敌方增益庇护。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="4">
+                <div class="char-ring-name">第五魂环｜十万年红环【网关溢流】</div>
+                <span class="char-rskill">闸道狂潮</span>
+                <div class="char-ring-body"><b>效果：</b>开启自身力量闸口，进入溢流爆发姿态。所有魂技冷却大幅缩减，攻击裹挟奔流冲击；可随时闭合闸道，终止力量倾泻，规避过载反噬。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="5">
+                <div class="char-ring-name">第六魂环｜百万年橙金环【时序仓阵】</div>
+                <span class="char-rskill">WMS 流转绞域</span>
+                <div class="char-ring-body"><b>效果：</b>铺开一片交织的流转领域。身处其中的敌人不断遭受切割伤害，行动与招式节奏被打乱；自身与镜像能够在领域节点之间瞬息挪移，持续围剿对手。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="6">
+                <div class="char-ring-name">第七魂环｜裁序之神·暗金神环【域枢巡检・武魂真身】</div>
+                <span class="char-rskill">巡检枢机战铠</span>
+                <div class="char-ring-body"><b>武魂真身：</b>巡检枢机战铠<br><b>效果：</b>覆上黑银交织的数据流战铠，全部魂技威力翻三倍；闸道狂潮不再带来反噬，流转绞域范围翻倍，幻骸分身上限提升至 4 具，锁链可同时束缚多名敌人。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="7">
+                <div class="char-ring-name">第八魂环｜灵衍之神·绿金神环【智核巡兵】</div>
+                <span class="char-rskill">Agent 猎巡</span>
+                <div class="char-ring-body"><b>效果：</b>投放独立智械巡兵，巡兵自主在领域内游走，搜寻标记目标、补下封禁锁链、追加异常印记。巡兵损毁时会引爆一次猛烈的冲击波。上限 3 尊巡兵。</div>
+              </div>
+
+              <div class="char-ring-view" data-i="8">
+                <div class="char-ring-name">第九魂环｜秩序之神·九彩神环【灰度终裁】</div>
+                <span class="char-rskill">灰度熔断・全域发布</span>
+                <div class="char-ring-body"><b>爆发段：</b>引爆所有锁链、幻骸、巡兵、领域节点，掀起毁灭性的全域冲击。<br><b>兜底段：</b>爆发之后可启动熔断回滚，涤除自身负面状态、修复伤势，撤销外放的规则冲击，规避力量透支带来的重创。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="char-sec">携行物</div>
+          <ul class="char-list">
+            <li><span class="char-tag">机械键盘</span><span class="char-note">×1（键帽 Y 已磨秃）</span></li>
+            <li><span class="char-tag">阿里云 ECS</span><span class="char-note">×1（最低配年付，痛）</span></li>
+            <li><span class="char-tag">MySQL 8 + Redis</span><span class="char-note">跑在宿主机上，别问为什么不集群</span></li>
+            <li><span class="char-tag">泡面</span><span class="char-note">×n</span></li>
+            <li><span class="char-tag">观看记录</span><span class="char-note">×200+（绑定，不可交易）</span></li>
+          </ul>
+
+          <div class="char-cols">
+            <div>
+              <div class="char-sec">残留异常</div>
+              <ul class="char-list">
+                <li><span class="char-tag">【期末】</span><span class="char-note">每学期末出现，全属性 -3</span></li>
+                <li><span class="char-tag">【OOM】</span><span class="char-note">内存不足时随机触发</span></li>
+                <li><span class="char-tag">【社恐】</span><span class="char-note">面对面时魅力 -5，打字时 +3</span></li>
+              </ul>
+            </div>
+            <div>
+              <div class="char-sec">产物</div>
+              <ul class="char-list">
+                <li><span class="char-tag">博客文章</span><span class="char-note">×6</span></li>
+                <li><span class="char-tag">邪修笔记</span><span class="char-note">×n</span></li>
+                <li><span class="char-tag">表情包</span><span class="char-note">若干</span></li>
+                <li><span class="char-tag">报错截图</span><span class="char-note">凌晨采集</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="char-sec">运行态</div>
+          <div class="char-row"><span class="char-k">出现地点</span><span class="char-v">宿舍 / 工位 / 深夜的终端前</span></div>
+          <div class="char-row"><span class="char-k">当前任务</span><span class="char-v">主线「把这个站养活」· 支线「吃好喝好」</span></div>
+
+          <details class="char-anime">
+            <summary>🎬 观看记录 · 200+ 部（点击展开）</summary>
+            <div class="char-anime-body">主播看过的动漫（只是看过的，不一定推荐你们去看啊）：(๑˃ᴗ˂)ﻭ<br><br>声之形，你的名字，天气之子，朝花夕誓，你好世界，言叶之庭，我想吃掉你的胰脏，青春猪头少年不会梦到兔女郎学姐，埃罗芒阿老师，国家队，五等分的新娘，总之就是非常可爱，堀与宫村，无职转生，剃须，更衣人偶坠入爱河，擅长捉弄的高木同学，租借女友，我叫白小飞，馒头日记，全职法师，全职高手，我能看到成功率，刺客567，暴击枪手之ak西游，我的逆天神器，魁拔，狠西游，中二病也要谈恋爱，我的青春恋爱物语果然有问题，魔女之旅，可塑性记忆，夏洛特，小林家的龙女仆，萤火之森，因为怕疼就全点防御了，紫罗兰永恒花园，未闻花名，欢迎来到实力至上主义教室，异度侵入，这个勇者明明超强却过分慎重，青梅竹马是消防员，宇崎酱想要玩耍，青酱不能学习，关于我转生成为史莱姆这档事，大护法，辉夜大小姐想让我告白，秒速五厘米，盾之勇者成名录，国王排名，打了300年的史莱姆不知不觉就练到了满级，四月是你的谎言，玉子市场，徒然喜欢你，阿拉德宿命之门，鬼灭之刃，从零开始的异世界生活，境界的彼方，终末的后宫，羁绊者，心灵代码，测不准的阿波连同学，千绪的上学路，回复术士的重启人生，赛马娘，十万个冷笑话，工作细胞，理科生坠入情网，家有女友，借东西的小人阿莉埃蒂，精灵幻想记，用我的手指搅乱，带着智能手机闯荡异世界，间谍过家家，史上最强大魔王转生为村民A，千与千寻，明月守护者，OVERLORD，多罗罗，转生成蜘蛛又怎样，进击的巨人，CLANNAD，天降女子，洗屋先生，僧侣之夜，打工吧魔王大人，式守同学不止可爱而已，七大罪，缘の空，女神宿舍管理员，一拳超人，坠落的天使，狂赌之渊，继母的拖油瓶是我前女友，冷面天使，古见同学有交流障碍症，彼得格里尔的贤者时间，overflow，东京喰种，在异世界迷宫开后宫，若能与你共乘海浪之上，影之实力者，火影忍者，灵能百分百，日在校园，金装的维尔梅，漆黑的子弹，转生成为魔剑，邻座的怪同学，命运石之门，电锯人，想哭的我带上了猫的面具，在下坂田有何贵干，政宗君的复仇，铃芽户缔，石纪元，卡巴内，冰海战记，物理魔法使马修，一人之下，刀剑神域，无颜之月，斩赤红之瞳，寄生兽，X龙时代，大王饶命，通往夏天的隧道，死亡笔记，夏日重现，我独自升级</div>
+          </details>
+
+          <div class="char-foot">档案由系统自动生成，与对象本人立场无关</div>
+
         </div>
 
+        <script>
+          (function () {
+            var card = document.querySelector('.char-card');
+            if (!card) return;
+            var btns = card.querySelectorAll('.char-ring-btn');
+            var views = card.querySelectorAll('.char-ring-view');
+            var panel = card.querySelector('.char-ring-panel');
+            function pick(i) {
+              btns.forEach(function (b, j) { b.classList.toggle('on', i === j); });
+              views.forEach(function (v, j) { v.classList.toggle('on', i === j); });
+              if (panel) {
+                var c = btns[i] && btns[i].style.getPropertyValue('--ring');
+                if (c) panel.style.setProperty('--ring', c);
+              }
+            }
+            btns.forEach(function (b) {
+              b.addEventListener('click', function () { pick(parseInt(b.dataset.i, 10) || 0); });
+            });
+            pick(0);
+          })();
+        </script>
         <div class="profile-actions">
           <a class="profile-btn" href="https://github.com/kamisheng" target="_blank" title="GitHub" data-label="GitHub"><i class="fa-brands fa-github"></i></a>
           <a class="profile-btn" href="mailto:kamisheng66@gmail.com" title="Email" data-label="Email"><i class="fa-regular fa-envelope"></i></a>
