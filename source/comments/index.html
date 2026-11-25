@@ -5,680 +5,1241 @@ comment: false
 ---
 
 <style>
-/* ========== 留言板：与文章页评论组件同一设计语言（主题 CSS 变量，明暗自动） ========== */
-.gb {
-  --gb-radius: 16px;
-  --gb-line: var(--border-color, rgba(0, 0, 0, 0.08));
-  --gb-soft: var(--second-text-color, #343a3c);
-  --gb-muted: var(--third-text-color, #9595a2);
-  --gb-paper: var(--second-background-color, #fafafa);
-  --gb-chip: var(--third-background-color, #f7f7f7);
-  --gb-brand: var(--primary-color, #5d3fd3);
+/* 本页自带标题，隐藏主题自动插入的页面标题与空评论区 */
+.page-template-content > h1 { display: none; }
+.page-template-comments,
+.comments-container,
+#waline,
+.comment-area-title { display: none !important; }
 
-  max-width: 820px;
-  margin: 0 auto;
-  padding: 0 4px 3.5rem;
-  color: var(--default-text-color, #373d3f);
+/* ============================================================
+   留言板 · 信箱与信纸
+   木桌面 + 铁皮信箱；写留言 = 写信投递，读留言 = 抽信展开
+   本页自带深色场景（不随主题明暗翻转），样式全部收敛在 .km 内
+   ============================================================ */
+.km {
+  --km-paper: #f0e7d8;
+  --km-amber: #ffb662;
+  --km-ink: #191410;
+  --km-ink-2: #4a4034;
+  --km-muted: #7d7263;
+  --km-red: #c0392b;
+  --km-blue: #24344d;
+  --km-blue-soft: rgba(36, 52, 77, 0.55);
+  --km-ease: cubic-bezier(.2, .7, .2, 1);
+
+  position: relative;
+  margin: -2rem auto 0;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #100c07;
+  color: var(--km-paper);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 15px;
   line-height: 1.7;
   text-align: left;
+  isolation: isolate;
+}
+.km, .km * { box-sizing: border-box; }
+.km p, .km h1, .km h2, .km h3, .km ul, .km li { margin: 0; }
+.km ul { list-style: none; padding: 0; }
+.km :where(button) {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.km a { color: inherit; text-decoration: none; }
+.km [hidden] { display: none !important; }
+
+/* ---------- 木桌面 ---------- */
+.km-room {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(52% 40% at 26% 24%, rgba(255, 182, 98, 0.16), transparent 62%),
+    radial-gradient(70% 50% at 84% 8%, rgba(255, 138, 61, 0.06), transparent 66%),
+    repeating-linear-gradient(93deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(90deg, rgba(255, 182, 98, 0.035) 0 1px, transparent 1px 52px),
+    linear-gradient(176deg, #191309 0%, #100c07 46%, #08080c 100%);
+}
+.km-room::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 86% at 50% 40%, transparent 38%, rgba(0, 0, 0, 0.66) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.42), transparent 26%, transparent 72%, rgba(0, 0, 0, 0.5));
+}
+.km-room::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 16%;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.45) 62%, rgba(0, 0, 0, 0.62));
 }
 
-/* ---------- 头部 ---------- */
-.gb-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px 14px;
-  margin: 0 0 18px;
+/* ---------- 版面 ---------- */
+.km-page {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(300px, 38%) minmax(0, 1fr);
+  gap: clamp(22px, 3.2vw, 52px);
+  align-items: start;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: clamp(44px, 6vh, 72px) clamp(20px, 3vw, 42px) 90px;
 }
-.gb-sub {
-  margin: 0;
-  color: var(--gb-muted);
+
+/* ---------- 左：信箱 ---------- */
+.km-scene { position: sticky; top: 88px; min-width: 0; }
+.km-kicker {
+  margin-bottom: 8px !important;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: rgba(255, 182, 98, 0.72);
+}
+.km-scene h1 {
+  font-family: "Songti SC", "Noto Serif SC", "SimSun", serif;
+  font-size: clamp(32px, 3.2vw, 44px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  color: var(--km-paper);
+}
+.km-scene-sub {
+  margin-top: 12px !important;
+  max-width: 30ch;
   font-size: 13.5px;
+  line-height: 1.85;
+  color: rgba(240, 231, 216, 0.52);
 }
-.gb-count {
-  display: inline-flex;
-  margin-left: 8px;
-  vertical-align: 1px;
-  align-items: center;
-  padding: 2px 11px;
-  border-radius: 999px;
-  background: var(--gb-chip);
-  color: var(--gb-brand);
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+.km-scene-foot {
+  margin-top: 6px !important;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: rgba(240, 231, 216, 0.34);
+  text-align: center;
 }
 
-/* ---------- 编辑器 ---------- */
-.gb-guest {
+.km-mailbox-wrap { position: relative; width: min(360px, 100%); margin: 4px auto 0; }
+.km-mailbox { display: block; width: 100%; height: auto; }
+.km-slot-hot {
+  position: absolute;
+  left: 30%;
+  top: 39.6%;
+  width: 40%;
+  height: 6.4%;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.km-slot-hot:focus-visible { outline: 1px dashed var(--km-amber); outline-offset: 4px; }
+.km-slot-mark { position: absolute; left: 50%; top: 41.8%; width: 1px; height: 1px; }
+
+.km-count-plate {
+  position: absolute;
+  left: -4%;
+  bottom: 22%;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 0 5px;
+  padding: 8px 14px 7px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #fbf6ec, #e6dcc8);
+  border: 1px solid rgba(21, 17, 12, 0.32);
+  box-shadow: 0 12px 22px -14px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  color: var(--km-ink);
+  transform: rotate(-2.2deg);
+}
+.km-count-plate::before,
+.km-count-plate::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(21, 17, 12, 0.28);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.km-count-plate::before { left: 5px; top: 5px; }
+.km-count-plate::after { right: 5px; bottom: 5px; }
+.km-cp-num {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.km-cp-unit { font-size: 12px; color: var(--km-ink-2); }
+.km-cp-cap { grid-column: 1 / -1; font-size: 10px; letter-spacing: 0.24em; color: var(--km-muted); }
+.km-count-plate.is-bump { animation: kmPlateBump 0.72s var(--km-ease); }
+@keyframes kmPlateBump {
+  0% { transform: rotate(-2.2deg) scale(1); }
+  36% { transform: rotate(1deg) scale(1.08); }
+  100% { transform: rotate(-2.2deg) scale(1); }
+}
+.km-count-pop {
+  position: absolute;
+  right: -12px;
+  top: -16px;
+  font-family: "Songti SC", serif;
+  font-size: 17px;
+  color: var(--km-amber);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  animation: kmPopUp 1.05s var(--km-ease) forwards;
+  pointer-events: none;
+}
+@keyframes kmPopUp {
+  0% { opacity: 0; transform: translateY(6px); }
+  28% { opacity: 1; transform: translateY(-2px); }
+  100% { opacity: 0; transform: translateY(-26px); }
+}
+
+.km-sign {
+  position: absolute;
+  right: -6%;
+  top: 13%;
+  width: 152px;
+  padding: 13px 13px 11px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(92deg, rgba(255, 255, 255, 0.03) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, #2b1d11, #180f08);
+  border: 1px solid rgba(255, 182, 98, 0.36);
+  color: var(--km-paper);
+  text-align: center;
+  transform-origin: top center;
+  transform: rotate(3deg) translateY(-6px);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 18px 30px -18px rgba(0, 0, 0, 0.95);
+  transition: opacity 0.4s var(--km-ease), transform 0.5s var(--km-ease);
+}
+.km-sign::before,
+.km-sign::after {
+  content: "";
+  position: absolute;
+  top: -27px;
+  width: 1px;
+  height: 27px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 182, 98, 0.6));
+}
+.km-sign::before { left: 30px; transform: rotate(9deg); }
+.km-sign::after { right: 30px; transform: rotate(-9deg); }
+.km-sign b {
+  display: block;
+  font-family: "Songti SC", serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.7;
+}
+.km-sign-btn {
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 182, 98, 0.4);
+  color: var(--km-amber);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  transition: background-color 0.2s, color 0.2s;
+}
+.km-sign-btn:hover { background: rgba(255, 182, 98, 0.14); color: #ffd9a8; }
+.km.is-guest .km-sign { opacity: 1; pointer-events: auto; transform: rotate(3deg); }
+.km.is-guest .km-slot-hot { cursor: help; }
+.km-sign.is-shake { animation: kmSignShake 0.5s var(--km-ease); }
+@keyframes kmSignShake {
+  20% { transform: rotate(-4deg); }
+  45% { transform: rotate(5deg); }
+  70% { transform: rotate(-1deg); }
+  100% { transform: rotate(3deg); }
+}
+
+.km-tray {
+  position: absolute;
+  right: -7%;
+  bottom: 4%;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.4s var(--km-ease), transform 0.5s var(--km-ease);
+}
+.km-tray.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.km-tray-label { font-size: 10.5px; letter-spacing: 0.2em; color: rgba(255, 182, 98, 0.8); padding-bottom: 4px; }
+.km-tray-letter {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 32px;
+  padding: 0;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #fbf6ec, #ece1cc);
+  border: 1px solid rgba(21, 17, 12, 0.35);
+  box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.95);
+  transform: rotate(-5deg);
+  cursor: pointer;
+  transition: transform 0.25s var(--km-ease);
+}
+.km-tray-letter:hover { transform: rotate(0deg) translateY(-3px); }
+.km-tray-letter::before {
+  content: "";
+  position: absolute;
+  left: 5px; right: 5px; top: 5px;
+  height: 11px;
+  border-left: 1px solid rgba(21, 17, 12, 0.24);
+  border-right: 1px solid rgba(21, 17, 12, 0.24);
+  transform: skewY(-14deg);
+}
+.km-tray-letter::after {
+  content: "";
+  position: absolute;
+  right: 6px; bottom: 5px;
+  width: 7px; height: 8px;
+  border: 1px solid rgba(192, 57, 43, 0.45);
+}
+.km-tray.is-drop .km-tray-letter { animation: kmLetterDrop 0.7s var(--km-ease); }
+@keyframes kmLetterDrop {
+  0% { opacity: 0; transform: translateY(-26px) rotate(-16deg) scale(0.8); }
+  60% { opacity: 1; transform: translateY(2px) rotate(-3deg) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) rotate(-5deg) scale(1); }
+}
+
+/* ---------- 右：写与读 ---------- */
+.km-board { min-width: 0; }
+.km-board-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.km-board-head h2 {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--km-paper);
+}
+.km-bh-chip {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 182, 98, 0.32);
+  color: var(--km-amber);
+  font-family: inherit;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  vertical-align: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.km-bh-sub { margin-top: 7px !important; font-size: 12.5px; line-height: 1.75; color: rgba(240, 231, 216, 0.45); }
+.km-who {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: rgba(240, 231, 216, 0.6);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.km-who::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5f6b57;
+}
+.km-who.is-on::before { background: #7bd88f; box-shadow: 0 0 8px rgba(123, 216, 143, 0.8); }
+
+/* 工具条 */
+.km-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 18px;
-  border: 1px dashed var(--gb-line);
-  border-radius: var(--gb-radius);
-  background: var(--gb-paper);
+  gap: 10px 14px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.gb-guest-tip {
-  min-width: 0;
-  color: var(--gb-soft);
-  font-size: 14px;
+.km-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.gb-guest-tip b {
-  color: var(--first-text-color, #323739);
+.km-tab {
+  height: 26px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: rgba(240, 231, 216, 0.52);
+  transition: background-color 0.2s var(--km-ease), color 0.2s var(--km-ease);
 }
-
-.gb-editor {
-  padding: 16px;
-  border: 1.5px solid var(--gb-line);
-  border-radius: var(--gb-radius);
-  background: var(--gb-paper);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.gb-editor:focus-within,
-.gb-reply:focus-within {
-  border-color: var(--gb-brand);
-  box-shadow: 0 0 0 4px rgba(124, 108, 255, 0.14);
-}
-.gb-identity {
-  display: flex;
+.km-tab:hover { color: rgba(255, 232, 200, 0.92); }
+.km-tab.is-active { background: rgba(255, 182, 98, 0.16); color: #ffd9a8; }
+.km-search {
+  display: inline-flex;
   align-items: center;
-  gap: 9px;
-  margin-bottom: 10px;
-  color: var(--gb-soft);
+  gap: 8px;
+  height: 33px;
+  padding: 0 13px;
+  margin-left: auto;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  transition: border-color 0.2s var(--km-ease), background-color 0.2s var(--km-ease);
+}
+.km-search:focus-within { border-color: rgba(255, 182, 98, 0.55); background: rgba(255, 255, 255, 0.07); }
+.km-search svg { flex: none; width: 14px; height: 14px; color: rgba(240, 231, 216, 0.4); }
+.km-search input {
+  width: 168px;
+  max-width: 40vw;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--km-paper);
+  font: inherit;
   font-size: 13px;
 }
-.gb-identity b {
-  color: var(--first-text-color, #323739);
-  font-weight: 700;
+.km-search input::placeholder { color: rgba(240, 231, 216, 0.3); }
+.km-search input::-webkit-search-cancel-button { filter: invert(0.8); }
+
+/* 写信纸 */
+.km-compose {
+  position: relative;
+  border-radius: 4px 4px 10px 10px;
+  background: linear-gradient(180deg, #fcf7ee, #f2e9d8);
+  color: var(--km-ink);
+  box-shadow: 0 30px 56px -34px rgba(0, 0, 0, 0.95), 0 1px 0 rgba(255, 255, 255, 0.65) inset;
+  overflow: hidden;
+  transition: transform 0.35s var(--km-ease), box-shadow 0.35s var(--km-ease);
 }
-.gb-editor textarea,
-.gb-reply textarea {
+.km-compose::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(21, 17, 12, 0.06);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.km-compose:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 36px 60px -34px rgba(0, 0, 0, 1), 0 0 0 1px rgba(255, 182, 98, 0.28);
+}
+.km-compose-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 22px 10px;
+  font-size: 12px;
+  color: var(--km-muted);
+  letter-spacing: 0.06em;
+}
+.km-compose-head b { color: var(--km-ink-2); font-weight: 600; }
+.km-compose-paper {
+  position: relative;
+  padding: 6px 22px 16px 52px;
+  background-image: repeating-linear-gradient(180deg, transparent 0 29px, rgba(21, 17, 12, 0.09) 29px 30px);
+  background-position: 0 7px;
+}
+.km-compose-paper::before {
+  content: "";
+  position: absolute;
+  left: 36px; top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(192, 57, 43, 0.32);
+}
+.km-draft {
   display: block;
   width: 100%;
-  min-height: 92px;
-  padding: 0;
+  min-height: 126px;
+  max-height: 324px;
+  padding: 3px 0 0;
   border: 0;
   outline: none;
   resize: none;
   background: transparent;
-  color: inherit;
-  font: inherit;
-  line-height: 1.7;
+  color: var(--km-ink);
+  font-family: "Songti SC", "Noto Serif SC", "SimSun", serif;
+  font-size: 15.5px;
+  line-height: 30px;
+  overflow: auto;
 }
-.gb-reply textarea {
-  min-height: 52px;
-}
-.gb-editor textarea::placeholder,
-.gb-reply textarea::placeholder {
-  color: var(--gb-muted);
-}
-.gb-editor-foot {
+.km-draft::placeholder { color: rgba(21, 17, 12, 0.28); }
+.km-compose-foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 10px 14px;
+  padding: 0 22px 18px;
 }
-.gb-counter {
-  margin-right: auto;
-  color: var(--gb-muted);
-  font-size: 12px;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.gb-counter.is-warn {
-  color: #dc2626;
-}
-
-/* ---------- 按钮 ---------- */
-.gb-btn {
+.km-counter { font-size: 11.5px; color: var(--km-muted); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+.km-counter.is-warn { color: var(--km-red); }
+.km-compose-tip { font-size: 11.5px; color: rgba(21, 17, 12, 0.34); letter-spacing: 0.02em; }
+.km-send {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 38px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 10px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.2s ease,
-    background-color 0.2s ease, color 0.2s ease;
+  padding: 0 24px;
+  margin-left: auto;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2a241c, #15110c);
+  color: #ffe9c9;
+  font-size: 13.5px;
+  letter-spacing: 0.2em;
+  box-shadow: 0 12px 22px -14px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+  transition: transform 0.2s var(--km-ease), box-shadow 0.3s var(--km-ease), opacity 0.2s;
 }
-.gb-btn.primary {
-  color: #fff;
-  background: linear-gradient(135deg, var(--gb-brand), #8b5cf6);
-  box-shadow: 0 8px 18px rgba(40, 71, 186, 0.2);
-}
-.gb-btn.primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(40, 71, 186, 0.26);
-}
-.gb-btn.ghost {
-  border: 1px solid var(--gb-line);
-  background: transparent;
-  color: var(--gb-soft);
-}
-.gb-btn.ghost:hover:not(:disabled) {
-  color: var(--gb-brand);
-  border-color: var(--gb-brand);
-}
-.gb-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-.gb-btn.small {
-  height: 32px;
-  padding: 0 14px;
-  font-size: 13px;
-}
-
-/* ---------- 工具条 ---------- */
-.gb-toolbar {
-  display: flex;
-  flex-wrap: wrap;
+.km-send:hover { transform: translateY(-1px); box-shadow: 0 16px 26px -14px rgba(0, 0, 0, 0.95); }
+.km-send:active { transform: translateY(0) scale(0.995); }
+.km-send:disabled { opacity: 0.5; cursor: default; transform: none; }
+.km-send.small { height: 32px; padding: 0 16px; margin-left: 0; font-size: 12.5px; letter-spacing: 0.12em; }
+.km-compose-guest {
+  display: none;
   align-items: center;
   justify-content: space-between;
-  gap: 10px 14px;
-  margin: 26px 0 4px;
-}
-.gb-tabs {
-  display: inline-flex;
-  gap: 2px;
-}
-.gb-tab {
-  height: 32px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--gb-soft);
-  font: inherit;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 22px;
+  border: 1px dashed rgba(21, 17, 12, 0.22);
+  border-radius: 8px;
+  color: var(--km-ink-2);
   font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease;
+  line-height: 1.7;
 }
-.gb-tab:hover {
-  background: var(--gb-chip);
-}
-.gb-tab.is-active {
-  background: var(--gb-chip);
-  color: var(--gb-brand);
-}
-.gb-search {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 13px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: var(--gb-chip);
-  transition: border-color 0.18s ease, background-color 0.18s ease;
-}
-.gb-search:focus-within {
-  border-color: var(--gb-brand);
-  background: var(--background-color, #fff);
-}
-.gb-search svg {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  color: var(--gb-muted);
-}
-.gb-search input {
-  width: 160px;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 13.5px;
-}
-.gb-search input::placeholder {
-  color: var(--gb-muted);
-}
+.km-compose-guest b { color: var(--km-ink); }
+.km-compose-guest .km-send { margin-left: 0; }
+.km.is-guest .km-compose-live { display: none; }
+.km.is-guest .km-compose-guest { display: flex; }
 
-/* ---------- 列表 ---------- */
-.gb-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.gb-item {
+/* 信堆 */
+.km-stack-sec { margin-top: 32px; }
+.km-stack-head {
   display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 12px;
-  padding: 20px 0;
-  border-top: 1px solid var(--gb-line);
+  margin-bottom: 14px;
+  padding: 0 2px;
 }
-.gb-item.is-new {
-  animation: gbFlash 1.8s ease;
+.km-stack-head h3 {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(247, 242, 232, 0.9);
 }
-.gb-avatar {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1;
-  user-select: none;
-  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.12);
+.km-stack-head h3 span {
+  margin-left: 8px;
+  font-family: inherit;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 182, 98, 0.72);
+  font-variant-numeric: tabular-nums;
 }
-.gb-avatar.sm {
-  width: 32px;
-  height: 32px;
-  font-size: 13px;
-}
-.gb-avatar img {
+.km-stack-hint { font-size: 11.5px; letter-spacing: 0.04em; color: rgba(240, 231, 216, 0.32); text-align: right; }
+.km-stack { display: flex; flex-direction: column; gap: 18px; padding: 2px 8px 10px 2px; }
+
+.km-letter {
+  position: relative;
   display: block;
   width: 100%;
-  height: 100%;
-  margin: 0 !important;
-  border-radius: 0 !important;
-  object-fit: cover;
+  padding: 15px 18px 16px;
+  border-radius: 5px;
+  text-align: left;
+  color: var(--km-ink);
+  background: linear-gradient(180deg, #f8f3e9, #eadfc9);
+  box-shadow: 0 16px 28px -22px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.32s var(--km-ease), box-shadow 0.32s var(--km-ease), opacity 0.32s var(--km-ease);
+  isolation: isolate;
+  animation: kmLetterIn 0.5s var(--km-ease) both;
+  animation-delay: var(--d, 0ms);
 }
-.gb-body {
-  flex: 1;
-  min-width: 0;
+.km-letter::before {
+  content: "";
+  position: absolute;
+  left: 5px; right: -5px;
+  top: 5px; bottom: -6px;
+  z-index: -1;
+  border-radius: 5px;
+  background: #e2d6bf;
+  box-shadow: 0 12px 20px -16px rgba(0, 0, 0, 0.8);
 }
-.gb-meta {
+.km-letter::after {
+  content: "";
+  position: absolute;
+  left: -3px; right: 3px;
+  top: -3px; bottom: 3px;
+  z-index: -2;
+  border-radius: 5px;
+  background: #efe6d5;
+  opacity: 0.75;
+}
+.km-letter:hover {
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow: 0 24px 36px -22px rgba(0, 0, 0, 1), 0 0 0 1px rgba(255, 182, 98, 0.35);
+}
+.km-letter:focus-visible { outline: 1px dashed var(--km-amber); outline-offset: 4px; }
+.km-letter.is-pulled { opacity: 0.4; transform: rotate(var(--tilt, 0deg)) scale(0.985); }
+.km-letter.is-new { animation: kmLetterIn 0.5s var(--km-ease) both, kmLetterFlash 2s ease 0.2s; }
+@keyframes kmLetterIn {
+  from { opacity: 0; transform: translateY(10px) rotate(var(--tilt, 0deg)); }
+  to { opacity: 1; transform: translateY(0) rotate(var(--tilt, 0deg)); }
+}
+@keyframes kmLetterFlash {
+  0% { box-shadow: 0 0 0 2px rgba(255, 182, 98, 0.7), 0 16px 28px -22px rgba(0, 0, 0, 0.9); }
+  100% { box-shadow: 0 16px 28px -22px rgba(0, 0, 0, 0.9); }
+}
+.km-l-head { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.km-l-name {
+  flex: none;
+  max-width: 62%;
+  overflow: hidden;
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--km-ink);
+  transform: rotate(-0.6deg);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.km-l-name em { font-style: normal; color: #9a4b2a; font-size: 11px; margin-left: 6px; letter-spacing: 0.08em; }
+.km-l-time { margin-left: auto; flex: none; font-size: 11px; letter-spacing: 0.04em; color: var(--km-muted); font-variant-numeric: tabular-nums; }
+.km-l-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 7px !important;
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 14px;
+  line-height: 1.72;
+  color: var(--km-ink-2);
+  word-break: break-word;
+}
+.km-l-foot { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: 11.5px; color: var(--km-muted); }
+.km-l-reply.has { color: var(--km-blue-soft); }
+.km-l-open { margin-left: auto; color: rgba(21, 17, 12, 0.4); letter-spacing: 0.04em; transition: color 0.2s; }
+.km-letter:hover .km-l-open { color: #b06a1c; }
+.km mark { padding: 0 1px; border-radius: 2px; background: rgba(255, 182, 98, 0.5); color: inherit; }
+
+.km-stack-empty {
+  padding: 36px 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  text-align: center;
+  color: rgba(240, 231, 216, 0.4);
+  font-size: 13px;
+  line-height: 1.9;
+}
+.km-stack-empty b {
+  display: block;
+  margin-bottom: 4px;
+  color: rgba(247, 242, 232, 0.78);
+  font-family: "Songti SC", serif;
+  font-size: 15.5px;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- 读信 ---------- */
+.km-reader {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 26px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.34s var(--km-ease), visibility 0.34s;
+}
+.km-reader.is-open { opacity: 1; visibility: visible; }
+.km-reader:not(.is-open) { pointer-events: none; }
+.km-reader-back {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(84% 66% at 50% 40%, rgba(8, 8, 12, 0.52), rgba(8, 8, 12, 0.9));
+}
+.km-sheet {
+  position: relative;
+  width: min(700px, 100%);
+  max-height: min(86vh, 880px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 3px;
+  color: var(--km-ink);
+  background: linear-gradient(180deg, #fcf7ee, #f1e7d5);
+  box-shadow: 0 60px 100px -44px rgba(0, 0, 0, 0.96), 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  transform: translateY(14px);
+  transition: transform 0.5s var(--km-ease), opacity 0.3s var(--km-ease);
+}
+.km-reader.is-open .km-sheet { transform: none; }
+.km-sheet::-webkit-scrollbar { width: 6px; }
+.km-sheet::-webkit-scrollbar-thumb { background: rgba(21, 17, 12, 0.2); border-radius: 999px; }
+.km-sheet.is-torn { visibility: hidden; }
+.km-sheet-in { position: relative; min-height: 100%; padding: 24px 30px 0 48px; }
+.km-sheet-in::before {
+  content: "";
+  position: absolute;
+  left: 34px; top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(192, 57, 43, 0.3);
+}
+.km-sheet-in::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(21, 17, 12, 0.06);
+  pointer-events: none;
+}
+.km-sheet-top {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px 14px;
+  padding: 6px 92px 14px 0;
+  border-bottom: 1px solid rgba(21, 17, 12, 0.12);
+}
+.km-sheet-who { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.km-s-name {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--km-ink);
+  transform: rotate(-0.8deg);
+}
+.km-s-time { font-size: 11.5px; color: var(--km-muted); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+.km-s-no { flex: none; font-size: 11px; letter-spacing: 0.14em; color: rgba(21, 17, 12, 0.34); white-space: nowrap; }
+.km-stamp {
+  position: absolute;
+  right: 0; top: 0;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  padding: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(192, 57, 43, 0.45);
+  color: rgba(192, 57, 43, 0.7);
+  font-family: "Songti SC", serif;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  text-align: center;
+  transform: rotate(9deg);
+  background: rgba(252, 247, 238, 0.35);
+}
+.km-stamp::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px dashed rgba(192, 57, 43, 0.32);
+  border-radius: 50%;
+}
+.km-stamp b { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
+
+.km-sheet-body {
+  margin-top: 2px !important;
+  padding: 8px 0 14px;
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 16.5px;
+  line-height: 32px;
+  color: var(--km-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background-image: repeating-linear-gradient(180deg, transparent 0 31px, rgba(21, 17, 12, 0.08) 31px 32px);
+  background-position: 0 2px;
+}
+
+.km-replies { padding: 14px 0 0; border-top: 1px dashed rgba(36, 52, 77, 0.28); }
+.km-replies-toggle {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  padding: 2px 0;
+  font-family: "Songti SC", serif;
+  font-size: 13.5px;
+  letter-spacing: 0.06em;
+  color: var(--km-blue);
+  border-bottom: 1px dashed rgba(36, 52, 77, 0.4);
+  transition: color 0.2s, border-color 0.2s;
 }
-.gb-name {
-  color: var(--first-text-color, #323739);
-  font-weight: 700;
+.km-replies-toggle::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--km-blue-soft); }
+.km-replies-toggle:hover { color: #14243d; border-color: var(--km-blue); }
+.km-replies-none { margin-top: 4px !important; font-family: "Songti SC", serif; font-size: 13px; color: rgba(21, 17, 12, 0.35); }
+.km-reply-list {
+  margin: 14px 0 0;
+  padding: 0 0 0 16px;
+  border-left: 1.5px solid rgba(36, 52, 77, 0.3);
+  list-style: none;
 }
-.gb-badge {
-  padding: 0 7px;
-  border-radius: 999px;
-  background: rgba(245, 158, 11, 0.18);
-  color: #d97706;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.6;
-}
-.gb-replyto {
-  color: var(--gb-muted);
-  font-size: 13px;
-}
-.gb-replyto b {
-  color: var(--gb-soft);
-  font-weight: 600;
-}
-.gb-time {
-  color: var(--gb-muted);
-  font-size: 12px;
-}
-.gb-content {
-  margin: 6px 0 0;
+.km-reply { padding: 4px 0 12px; }
+.km-reply + .km-reply { border-top: 1px dashed rgba(36, 52, 77, 0.18); padding-top: 12px; }
+.km-reply-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 11.5px; line-height: 1.6; }
+.km-rh-name { font-family: "Songti SC", serif; font-size: 13.5px; font-weight: 600; color: var(--km-blue); letter-spacing: 0.04em; }
+.km-rh-to { color: var(--km-blue-soft); }
+.km-rh-time { margin-left: auto; color: rgba(36, 52, 77, 0.45); font-variant-numeric: tabular-nums; }
+.km-rh-btn { padding: 0 2px; font-size: 11.5px; color: rgba(36, 52, 77, 0.55); border-bottom: 1px solid rgba(36, 52, 77, 0.28); transition: color 0.2s, border-color 0.2s; }
+.km-rh-btn:hover { color: var(--km-blue); border-color: var(--km-blue); }
+.km-reply-body {
+  margin-top: 3px !important;
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 14.5px;
+  line-height: 26px;
+  color: var(--km-blue);
   white-space: pre-wrap;
   word-break: break-word;
 }
-.gb-content a {
-  color: var(--gb-brand);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(93, 63, 211, 0.28);
-}
-.gb-content a:hover {
-  border-bottom-color: var(--gb-brand);
-}
-.gb-content img {
-  display: block;
-  background: var(--gb-chip);
-  max-width: 100%;
-  max-height: 320px;
-  margin: 10px 0 0 !important;
-  border-radius: 12px;
-  object-fit: cover;
-}
-.gb-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 8px;
-}
-.gb-link {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--gb-muted);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-.gb-link:hover {
-  color: var(--gb-brand);
-}
-.gb-link.danger:hover {
-  color: #dc2626;
-}
+.km-reply.is-fresh { animation: kmInkIn 0.5s var(--km-ease) both; }
+@keyframes kmInkIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* ---------- 楼中楼 ---------- */
-.gb-replies {
-  margin: 12px 0 0;
-  padding: 0 0 0 14px;
-  border-left: 2px solid var(--gb-line);
-  list-style: none;
+.km-reply-form {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px dashed rgba(36, 52, 77, 0.35);
+  border-radius: 4px;
+  background: rgba(36, 52, 77, 0.035);
+  color: var(--km-blue);
 }
-.gb-replies .gb-item {
-  padding: 14px 0 0;
-  border-top: 0;
+.km-rf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 11.5px; color: var(--km-blue-soft); letter-spacing: 0.04em; }
+.km-rf-head b { min-width: 0; overflow: hidden; font-family: "Songti SC", serif; font-size: 13.5px; font-weight: 600; color: var(--km-blue); text-overflow: ellipsis; white-space: nowrap; }
+.km-reply-form textarea {
+  display: block;
+  width: 100%;
+  min-height: 62px;
+  margin-top: 6px;
+  padding: 2px 0 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--km-blue);
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 14.5px;
+  line-height: 26px;
 }
-.gb-reply {
-  margin: 10px 0 0;
-  padding: 10px 12px;
-  border: 1.5px solid var(--gb-line);
-  border-radius: 12px;
-  background: var(--gb-chip);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.gb-reply-head {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 6px;
-  color: var(--gb-soft);
-  font-size: 13px;
-}
-.gb-reply-head .gb-counter {
-  margin: 0 0 0 auto;
-  font-size: 11.5px;
-}
-.gb-reply-tolabel {
-  flex: none;
-  white-space: nowrap;
-}
-.gb-reply-head b {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--gb-brand);
-  font-weight: 700;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.gb-reply-foot {
+.km-reply-form textarea::placeholder { color: rgba(36, 52, 77, 0.4); }
+.km-rf-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 6px; }
+.km-link { padding: 0; font-size: 12px; color: var(--km-blue-soft); border-bottom: 1px solid rgba(36, 52, 77, 0.3); transition: color 0.2s; }
+.km-link:hover { color: var(--km-blue); }
+.km-reply-form .km-send.small { background: linear-gradient(180deg, #2c3c56, #1a273c); color: #f2ede2; box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.7); }
+
+.km-sheet-foot {
+  position: sticky;
+  bottom: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-/* ---------- 状态 / 更多 ---------- */
-.gb-state {
-  padding: 56px 0;
-  color: var(--gb-muted);
-  font-size: 14px;
-  text-align: center;
-}
-.gb-state b {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--gb-soft);
-  font-size: 15px;
-  font-weight: 700;
-}
-.gb-state .gb-btn {
+  gap: 8px 18px;
   margin-top: 14px;
+  padding: 14px 0 18px;
+  background: linear-gradient(180deg, rgba(247, 242, 232, 0), #f2e8d7 42%);
+  border-top: 1px solid rgba(21, 17, 12, 0.1);
 }
-.gb-more {
-  display: flex;
-  justify-content: center;
-  padding: 22px 0 0;
+.km-s-act { padding: 2px 0; font-size: 12.5px; letter-spacing: 0.08em; color: var(--km-ink-2); border-bottom: 1px solid rgba(21, 17, 12, 0.25); transition: color 0.2s, border-color 0.2s; }
+.km-s-act:hover { color: #b06a1c; border-color: #b06a1c; }
+.km-s-act.danger { color: rgba(192, 57, 43, 0.85); border-color: rgba(192, 57, 43, 0.35); }
+.km-s-act.danger:hover { color: var(--km-red); border-color: var(--km-red); }
+.km-s-act.is-armed {
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: rgba(192, 57, 43, 0.1);
+  border-color: rgba(192, 57, 43, 0.55);
+  color: var(--km-red);
+  animation: kmArmedIn 0.3s var(--km-ease);
 }
-.gb-end {
-  padding: 24px 0 0;
-  color: var(--gb-muted);
-  font-size: 12.5px;
-  text-align: center;
-}
-.gb-toast {
-  margin-top: 12px;
-  color: #dc2626;
-  font-size: 13px;
-}
-.gb-toast.is-ok {
-  color: #059669;
-}
+@keyframes kmArmedIn { from { transform: scale(0.96); } to { transform: none; } }
+.km-s-act.quiet { margin-left: auto; color: var(--km-muted); border-color: rgba(21, 17, 12, 0.18); }
+.km-s-act.quiet:hover { color: var(--km-ink); border-color: var(--km-ink); }
+.km-sheet.has-reply .km-sheet-foot { position: static; background: none; }
+.km-foot-note { font-size: 10.5px; letter-spacing: 0.04em; color: rgba(21, 17, 12, 0.3); }
 
-@keyframes gbFlash {
-  0% {
-    background: rgba(124, 108, 255, 0.12);
-  }
-  100% {
-    background: transparent;
-  }
-}
-@keyframes gbIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.gb-enter {
-  animation: gbIn 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: var(--gb-delay, 0ms);
-}
-
-@media (max-width: 640px) {
-  .gb-toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .gb-search {
-    justify-content: flex-start;
-  }
-  .gb-search input {
-    width: 100%;
-  }
-  .gb-avatar {
-    width: 34px;
-    height: 34px;
-    font-size: 14px;
-  }
-  .gb-item {
-    padding: 16px 0;
-  }
-}
-
-/* 留言板页不显示主题自带的 Waline 评论区（本页已有自己的留言区） */
-.comments-container,
-#waline,
-.comment-area-title {
-  display: none !important;
-}
-
-
-/* ---------- 卡片墙排版（留言以卡片形式成墙） ---------- */
-.gb-list {
-  display: block;
-  column-count: 3;
-  column-gap: 16px;
-}
-.gb-list > .gb-state {
-  column-span: all;
-}
-.gb-thread {
-  break-inside: avoid;
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
-  position: relative;
-  margin: 0 0 16px;
-  padding: 20px 18px 14px 21px;
+/* 投递飞行 */
+.km-fly {
+  position: fixed;
+  z-index: 5100;
+  padding: 16px 20px 16px 44px;
+  border-radius: 3px;
   overflow: hidden;
-  border: 1px solid var(--gb-line);
-  border-radius: 18px;
-  background: var(--gb-paper);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  background-color: #fbf6ec;
+  background-image: repeating-linear-gradient(180deg, transparent 0 25px, rgba(21, 17, 12, 0.09) 25px 26px);
+  box-shadow: 0 26px 44px -24px rgba(0, 0, 0, 0.9);
+  color: var(--km-ink);
+  font-family: "Songti SC", serif;
+  font-size: 13px;
+  line-height: 26px;
+  pointer-events: none;
+  transform-origin: 50% 50%;
 }
-.gb-thread::before {
-  content: "";
+.km-fly::before { content: ""; position: absolute; left: 30px; top: 0; bottom: 0; width: 1px; background: rgba(192, 57, 43, 0.32); }
+.km-fly.is-flying { animation: kmFlyIn 0.6s cubic-bezier(0.45, 0.05, 0.75, 0.4) forwards; }
+@keyframes kmFlyIn {
+  0% { transform: none; opacity: 1; }
+  34% { transform: scale(0.9, 0.44) translateY(10px) rotate(-1deg); opacity: 0.96; }
+  100% { transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(0.09) rotate(-16deg); opacity: 0.15; }
+}
+
+/* 撕信 */
+.km-tear { position: fixed; z-index: 5200; pointer-events: none; }
+.km-tear-half {
   position: absolute;
   left: 0;
-  top: 14px;
-  bottom: 14px;
-  width: 3px;
-  border-radius: 999px;
-  background: var(--u-color, var(--gb-brand));
-  opacity: 0.85;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.55));
+  transition: transform 0.64s cubic-bezier(0.4, 0, 0.78, 0.5), opacity 0.64s ease-in;
+  will-change: transform, opacity;
 }
-.gb-thread:hover {
-  transform: translateY(-2px);
-  border-color: rgba(124, 108, 255, 0.42);
-  box-shadow: 0 16px 30px rgba(8, 12, 30, 0.22);
+.km-tear-half.top {
+  top: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 46%, 92% 50%, 84% 45%, 76% 51%, 68% 46%, 60% 52%, 52% 47%, 44% 53%, 36% 47%, 28% 52%, 20% 46%, 12% 51%, 4% 47%, 0 50%);
 }
-.gb-thread .gb-item {
-  padding: 0;
-  border-top: 0;
+.km-tear-half.bottom {
+  top: 50%;
+  clip-path: polygon(0 50%, 4% 47%, 12% 51%, 20% 46%, 28% 52%, 36% 47%, 44% 53%, 52% 47%, 60% 52%, 68% 46%, 76% 51%, 84% 45%, 92% 50%, 100% 46%, 100% 100%, 0 100%);
 }
-.gb-thread .gb-item .gb-avatar.sm {
-  width: 30px;
-  height: 30px;
-  font-size: 12px;
-}
-.gb-thread .gb-content {
-  margin-top: 8px;
-  font-size: 14.5px;
-  line-height: 1.72;
-}
-.gb-replies {
-  margin-top: 12px;
-  padding: 12px 0 0;
-  border-left: 0;
-  border-top: 1px solid var(--gb-line);
-}
-.gb-replies .gb-item {
-  padding: 12px 0 0;
-}
-.gb-replies-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--gb-muted);
-  font: inherit;
+.km-tear-half > .km-sheet { max-height: none; overflow: hidden; box-shadow: none; transform: none; }
+
+/* 提示条 */
+.km-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  z-index: 5300;
+  max-width: min(440px, calc(100vw - 40px));
+  padding: 10px 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 182, 98, 0.28);
+  background: rgba(10, 10, 14, 0.92);
+  color: #f0e8d8;
   font-size: 12.5px;
-  cursor: pointer;
-  transition: color 0.15s ease;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  text-align: center;
+  box-shadow: 0 18px 34px -18px rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  pointer-events: none;
+  transition: opacity 0.28s var(--km-ease), transform 0.28s var(--km-ease);
 }
-.gb-replies-toggle:hover {
-  color: var(--gb-brand);
-}
-.gb-replies-toggle::before {
-  content: "";
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--u-color, var(--gb-brand));
-  opacity: 0.55;
-}
+.km-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.km-toast.is-bad { border-color: rgba(220, 38, 38, 0.45); }
 
-.gb-toast-list {
-  column-span: all;
-  display: block;
-  margin: 0 0 12px;
-  padding: 10px 14px;
-  border: 1px solid rgba(220, 38, 38, 0.32);
-  border-radius: 12px;
-  background: rgba(220, 38, 38, 0.08);
-  color: #dc2626;
-  font-size: 13px;
-}
+/* ---------- 移动端 ---------- */
+@media (max-width: 900px) {
+  .km { margin: -1rem auto 0; border-radius: 16px; }
+  .km-page { display: block; padding: 40px 16px 72px; }
+  .km-scene { position: static; text-align: center; }
+  .km-kicker { font-size: 10px; letter-spacing: 0.28em; }
+  .km-scene h1 { font-size: 26px; letter-spacing: 0.12em; }
+  .km-scene-sub { margin: 6px auto 0 !important; max-width: 34ch; font-size: 12px; line-height: 1.7; }
+  .km-mailbox-wrap { width: 156px; margin: 10px auto 0; }
+  .km-scene-foot { display: none; }
+  .km-count-plate { left: -22%; bottom: 24%; padding: 5px 9px 4px; }
+  .km-cp-num { font-size: 20px; }
+  .km-cp-cap { font-size: 8px; letter-spacing: 0.16em; }
+  .km-sign { right: 0; top: 11%; width: 108px; padding: 9px 8px 8px; }
+  .km-sign b { font-size: 11px; }
+  .km-sign-btn { margin-top: 5px; font-size: 10px; padding: 3px 9px; }
+  .km-sign::before { left: 22px; height: 22px; top: -22px; }
+  .km-sign::after { right: 22px; height: 22px; top: -22px; }
+  .km-tray { right: -6px; bottom: 0; }
+  .km-tray-label { font-size: 9px; }
+  .km-tray-letter { width: 36px; height: 25px; }
 
-/* 顶部：收起的发布入口 */
-.gb-new {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 14px 16px;
-  border: 1px dashed var(--gb-line);
-  border-radius: 16px;
-  background: transparent;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-.gb-new:hover {
-  border-color: var(--gb-brand);
-  background: var(--gb-paper);
-}
-.gb-new-tip {
-  color: var(--gb-muted);
-  font-size: 14px;
-}
+  .km-board { margin-top: 26px; }
+  .km-board-head { align-items: center; }
+  .km-board-head h2 { font-size: 19px; letter-spacing: 0.04em; }
+  .km-bh-chip { margin-left: 6px; font-size: 10.5px; padding: 2px 8px; }
+  .km-bh-sub { font-size: 11.5px; line-height: 1.7; }
+  .km-who { padding: 5px 10px; font-size: 10.5px; }
 
-@media (max-width: 1000px) {
-  .gb-list {
-    column-count: 2;
-  }
-}
-@media (max-width: 680px) {
-  .gb-list {
-    column-count: 1;
-  }
-}
+  .km-toolbar { gap: 10px; }
+  .km-tab { height: 25px; padding: 0 12px; font-size: 12px; }
+  .km-search { margin-left: 0; flex: 1; min-width: 150px; }
+  .km-search input { width: 100%; max-width: none; font-size: 12.5px; }
 
+  .km-compose-head { padding: 13px 16px 8px; font-size: 11px; }
+  .km-compose-paper { padding: 4px 16px 12px 40px; }
+  .km-compose-paper::before { left: 27px; }
+  .km-draft { min-height: 112px; font-size: 15px; line-height: 28px; }
+  .km-compose-foot { padding: 0 16px 15px; }
+  .km-compose-tip { display: none; }
+  .km-send { height: 36px; padding: 0 20px; font-size: 13px; }
+
+  .km-stack-sec { margin-top: 26px; }
+  .km-stack-head h3 { font-size: 15.5px; }
+  .km-stack-hint { font-size: 10.5px; }
+  .km-stack { gap: 14px; padding-right: 4px; }
+  .km-letter { padding: 13px 14px 12px; }
+  .km-l-name { font-size: 15.5px; }
+  .km-l-text { font-size: 13.5px; line-height: 1.68; }
+
+  .km-reader { padding: 70px 10px 56px; place-items: start center; }
+  .km-sheet { max-height: calc(100vh - 126px); width: 100%; }
+  .km-sheet-in { padding: 16px 16px 24px 30px; }
+  .km-sheet-in::before { left: 21px; }
+  .km-sheet-top { padding: 4px 76px 10px 0; }
+  .km-s-name { font-size: 21px; }
+  .km-s-time { font-size: 10.5px; }
+  .km-s-no { font-size: 10px; }
+  .km-stamp { width: 62px; height: 62px; font-size: 8.5px; }
+  .km-stamp b { font-size: 10px; }
+  .km-sheet-body { font-size: 15px; line-height: 28px; background-image: repeating-linear-gradient(180deg, transparent 0 27px, rgba(21, 17, 12, 0.08) 27px 28px); }
+  .km-reply-list { padding-left: 11px; }
+  .km-reply-body { font-size: 14px; line-height: 25px; }
+  .km-sheet-foot { gap: 8px 14px; padding: 12px 0 14px; }
+  .km-foot-note { display: none; }
+  .km-s-act { font-size: 12px; }
+  .km-toast { bottom: 84px; }
+}
+@media (max-width: 380px) {
+  .km-sign { width: 96px; }
+  .km-sign b { font-size: 10.5px; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .gb-enter,
-  .gb-item.is-new {
-    animation: none !important;
-  }
+  .km-letter, .km-letter.is-new, .km-reply.is-fresh { animation: none !important; }
+  .km-fly.is-flying { animation-duration: 0.01s; }
+  .km-tear-half { transition-duration: 0.01s; }
 }
+
+/* 页面内不再显示主题自带评论区 */
+.km ~ .comments-container,
+.km ~ #waline { display: none !important; }
 </style>
 
-<div class="gb" id="commentsPage">
-  <div class="gb-head">
-    <p class="gb-sub">
-      想说什么都可以留在这里，登录后可以回复别人的留言。
-      <span class="gb-count" id="gbCount">加载中</span>
-    </p>
+<div class="km" id="commentsPage">
+  <div class="km-room" aria-hidden="true"></div>
+
+  <div class="km-page">
+    <!-- 左：桌面上的信箱 -->
+    <aside class="km-scene">
+      <p class="km-kicker">深夜信箱</p>
+      <h1>留言板</h1>
+      <p class="km-scene-sub">写一封，投进去。我会一封一封地读，也会回。</p>
+
+      <div class="km-mailbox-wrap">
+        <svg class="km-mailbox" viewBox="0 0 440 600" aria-hidden="true">
+          <defs>
+            <linearGradient id="kmBoxG" x1="86" y1="130" x2="354" y2="446" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#faf5ec" />
+              <stop offset="0.52" stop-color="#efe6d4" />
+              <stop offset="1" stop-color="#d8cab0" />
+            </linearGradient>
+            <linearGradient id="kmDrawerG" x1="94" y1="438" x2="346" y2="536" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#f3ebdb" />
+              <stop offset="1" stop-color="#ccbea3" />
+            </linearGradient>
+            <linearGradient id="kmMetalG" x1="178" y1="300" x2="262" y2="314" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#4d4030" />
+              <stop offset="0.5" stop-color="#24190f" />
+              <stop offset="1" stop-color="#4d4030" />
+            </linearGradient>
+            <radialGradient id="kmHaloG">
+              <stop offset="0" stop-color="#ffb662" stop-opacity="0.34" />
+              <stop offset="1" stop-color="#ffb662" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+
+          <ellipse cx="220" cy="310" rx="212" ry="238" fill="url(#kmHaloG)" />
+          <ellipse cx="220" cy="556" rx="170" ry="16" fill="#000" opacity="0.5" />
+          <ellipse cx="220" cy="552" rx="118" ry="9" fill="#000" opacity="0.35" />
+
+          <path d="M118 518 h30 v22 q0 6 -8 6 h-14 q-8 0 -8 -6 Z" fill="#241a11" />
+          <path d="M292 518 h30 v22 q0 6 -8 6 h-14 q-8 0 -8 -6 Z" fill="#241a11" />
+
+          <rect x="92" y="434" width="256" height="96" rx="9" fill="url(#kmDrawerG)" stroke="#241a11" stroke-width="2.5" />
+          <rect x="104" y="446" width="232" height="72" rx="5" fill="none" stroke="rgba(21,17,12,0.16)" stroke-width="1.5" />
+          <text x="220" y="469" text-anchor="middle" font-family="Songti SC, serif" font-size="12" letter-spacing="4" fill="rgba(21,17,12,0.42)">旧信</text>
+          <rect x="196" y="479" width="48" height="10" rx="5" fill="url(#kmMetalG)" />
+          <path d="M201 482 h38" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" />
+
+          <path d="M74 300 Q74 128 220 128 Q366 128 366 300 L366 430 Q366 446 350 446 L90 446 Q74 446 74 430 Z"
+                fill="url(#kmBoxG)" stroke="#241a11" stroke-width="2.5" />
+          <path d="M96 300 Q96 160 220 160 Q344 160 344 300" fill="none" stroke="rgba(21,17,12,0.14)" stroke-width="2" />
+          <path d="M112 300 Q112 176 220 176" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" />
+          <path d="M86 292 Q88 152 214 138" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="3" stroke-linecap="round" opacity="0.55" />
+          <path d="M366 296 L366 430 Q366 446 350 446 L332 446 L332 296 Z" fill="rgba(21,17,12,0.05)" />
+
+          <text x="220" y="213" text-anchor="middle" font-family="Songti SC, serif" font-size="17" letter-spacing="7" fill="rgba(21,17,12,0.48)">深夜信箱</text>
+
+          <g>
+            <rect x="132" y="236" width="176" height="27" rx="8" fill="#171208" />
+            <rect x="139" y="242" width="162" height="8" rx="4" fill="#000" opacity="0.55" />
+            <rect x="132" y="255" width="176" height="5" rx="2.5" fill="rgba(255,255,255,0.26)" />
+            <path d="M150 240.5 h140" stroke="rgba(255,182,98,0.42)" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M124 234 Q220 219 316 234" fill="none" stroke="#241a11" stroke-width="2.5" stroke-linecap="round" />
+          </g>
+
+          <g>
+            <circle cx="184" cy="304" r="7.5" fill="#efe6d4" stroke="#241a11" stroke-width="2" />
+            <circle cx="256" cy="304" r="7.5" fill="#efe6d4" stroke="#241a11" stroke-width="2" />
+            <path d="M184 306 q36 17 72 0" fill="none" stroke="url(#kmMetalG)" stroke-width="6" stroke-linecap="round" />
+            <path d="M190 307 q30 13 60 0" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" />
+          </g>
+
+          <rect x="96" y="330" width="248" height="96" rx="7" fill="none" stroke="rgba(21,17,12,0.11)" stroke-width="1.5" />
+          <circle cx="107" cy="341" r="3" fill="rgba(21,17,12,0.18)" />
+          <circle cx="333" cy="341" r="3" fill="rgba(21,17,12,0.18)" />
+          <circle cx="107" cy="415" r="3" fill="rgba(21,17,12,0.18)" />
+          <circle cx="333" cy="415" r="3" fill="rgba(21,17,12,0.18)" />
+        </svg>
+
+        <button class="km-slot-hot" id="kmSlotHot" type="button" aria-label="投信口：写好的信从这里投进去"></button>
+        <span class="km-slot-mark" id="kmSlotMark" aria-hidden="true"></span>
+
+        <div class="km-count-plate" id="kmCountPlate">
+          <span class="km-cp-num" id="kmCpNum">0</span>
+          <span class="km-cp-unit">封</span>
+          <span class="km-cp-cap">来信</span>
+        </div>
+
+        <div class="km-sign" id="kmSign">
+          <b>需登录才能投信</b>
+          <a class="km-sign-btn" id="kmSignLogin" href="/login/?redirect=%2Fcomments%2F">去登录</a>
+        </div>
+
+        <div class="km-tray" id="kmTray" aria-hidden="true">
+          <span class="km-tray-label">新到</span>
+          <button class="km-tray-letter" id="kmTrayLetter" type="button" aria-label="打开刚投进去的那封信"></button>
+        </div>
+      </div>
+
+      <p class="km-scene-foot">信纸都在右边 · 抽一封出来读</p>
+    </aside>
+
+    <!-- 右：写与读 -->
+    <main class="km-board">
+      <header class="km-board-head">
+        <div>
+          <h2>写一封<span class="km-bh-chip" id="kmBhCount">已收 0 封</span></h2>
+          <p class="km-bh-sub">登录后可以回别人的信。每封最多 1000 字，投递之后才会公开。</p>
+        </div>
+        <span class="km-who" id="kmWho">只看信</span>
+      </header>
+
+      <div class="km-toolbar">
+        <div class="km-tabs" id="kmSort" role="tablist" aria-label="排序">
+          <button class="km-tab is-active" type="button" data-sort="latest" role="tab" aria-selected="true">最新</button>
+          <button class="km-tab" type="button" data-sort="hot" role="tab" aria-selected="false">最热</button>
+        </div>
+        <label class="km-search" for="kmSearch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.2-3.2"></path>
+          </svg>
+          <input id="kmSearch" type="search" placeholder="找某个人的信" autocomplete="off">
+        </label>
+      </div>
+
+      <section class="km-compose" id="kmCompose" aria-label="写一封信">
+        <div class="km-compose-live">
+          <div class="km-compose-head">
+            <span>寄信人 · <b id="kmDraftWho">我</b></span>
+            <span id="kmToday"></span>
+          </div>
+          <div class="km-compose-paper">
+            <textarea class="km-draft" id="kmDraft" maxlength="1000" placeholder="写给这个站，或者写给还没睡着的自己……"></textarea>
+          </div>
+          <div class="km-compose-foot">
+            <span class="km-counter" id="kmCounter">0 / 1000</span>
+            <span class="km-compose-tip">写好后点投递，信会飞进上面的信箱</span>
+            <button class="km-send" id="kmSend" type="button">投 递</button>
+          </div>
+        </div>
+
+        <div class="km-compose-guest">
+          <div><b>还没登录。</b>登录之后，这张信纸才归你。</div>
+          <a class="km-send" href="/login/?redirect=%2Fcomments%2F">去登录</a>
+        </div>
+      </section>
+
+      <section class="km-stack-sec" aria-label="信纸堆">
+        <div class="km-stack-head">
+          <h3>信纸堆 <span id="kmStackCount">0 封</span></h3>
+          <span class="km-stack-hint" id="kmStackHint">点一封，抽出来看</span>
+        </div>
+        <div class="km-stack" id="kmStack"></div>
+      </section>
+    </main>
   </div>
 
-  <div id="gbEditor" class="gb-editor-slot"></div>
+  <!-- 读信 -->
+  <div class="km-reader" id="kmReader" aria-hidden="true">
+    <div class="km-reader-back" id="kmReaderBack"></div>
+    <div class="km-sheet" id="kmSheet" role="dialog" aria-modal="true" aria-labelledby="kmRName">
+      <div class="km-sheet-in">
+        <header class="km-sheet-top">
+          <div class="km-sheet-who">
+            <span class="km-s-name" id="kmRName"></span>
+            <span class="km-s-time" id="kmRTime"></span>
+            <span class="km-s-no" id="kmRNo"></span>
+          </div>
+          <div class="km-stamp" aria-hidden="true">
+            <span>深夜信箱</span>
+            <b id="kmStampDate"></b>
+            <span>已阅</span>
+          </div>
+        </header>
 
-  <div class="gb-toolbar">
-    <div class="gb-tabs" id="gbSort">
-      <button class="gb-tab is-active" type="button" data-sort="latest">最新</button>
-      <button class="gb-tab" type="button" data-sort="oldest">最早</button>
+        <div class="km-sheet-body" id="kmRBody"></div>
+
+        <section class="km-replies" aria-label="回信">
+          <button class="km-replies-toggle" id="kmRepliesToggle" type="button" aria-expanded="false" hidden></button>
+          <p class="km-replies-none" id="kmRepliesNone" hidden>还没有回信，你可以第一个写。</p>
+          <ul class="km-reply-list" id="kmReplyList" hidden></ul>
+
+          <div class="km-reply-form" id="kmReplyForm" hidden>
+            <div class="km-rf-head">
+              <span>回给 <b id="kmRfTo"></b></span>
+              <span class="km-counter" id="kmRfCounter">0 / 1000</span>
+            </div>
+            <textarea id="kmRfText" maxlength="1000" rows="3" placeholder="用蓝墨水写两句，会跟这封信钉在一起。"></textarea>
+            <div class="km-rf-foot">
+              <button class="km-link" id="kmRfCancel" type="button">先不写</button>
+              <button class="km-send small" id="kmRfSend" type="button">写上去</button>
+            </div>
+          </div>
+        </section>
+
+        <footer class="km-sheet-foot">
+          <button class="km-s-act" id="kmReplyBtn" type="button">回信</button>
+          <button class="km-s-act danger" id="kmDelBtn" type="button" hidden>撕掉这封</button>
+          <span class="km-foot-note">投递后公开 · 谨慎落笔</span>
+          <button class="km-s-act quiet" id="kmCloseBtn" type="button">收起来</button>
+        </footer>
+      </div>
     </div>
-    <label class="gb-search" for="gbSearch">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
-        <circle cx="11" cy="11" r="7"></circle>
-        <path d="m20 20-3.2-3.2"></path>
-      </svg>
-      <input id="gbSearch" type="search" placeholder="搜索昵称或内容" autocomplete="off">
-    </label>
   </div>
 
-  <div class="gb-list" id="gbList">
-    <div class="gb-state">正在加载留言…</div>
-  </div>
-  <div class="gb-more" id="gbMore"></div>
+  <div class="km-toast" id="kmToast" role="status" aria-live="polite"></div>
 </div>
