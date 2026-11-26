@@ -637,46 +637,35 @@ comments: false
   height: 54px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  transition: transform 0.24s var(--arc-ease), filter 0.24s var(--arc-ease);
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28));
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #f8f3e9;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.24s var(--arc-ease);
 }
-/* 环体：中空圆环 */
+/* 环体：中空发光能量环（斗罗式） */
 .arc-ring::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 4px;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 50%,
-      transparent 0 40%,
-      rgba(255, 255, 255, 0.55) 41% 44%,
-      var(--ring, #3d3d47) 45% 68%,
-      rgba(0, 0, 0, 0.55) 69% 74%,
-      transparent 75%);
+  border: 4px solid var(--ring, #3d3d47);
+  background: radial-gradient(circle, rgba(12, 9, 6, 0.3) 30%, rgba(12, 9, 6, 0.05) 55%, transparent 64%);
   box-shadow:
-    0 0 10px -1px var(--ring, #3d3d47),
-    inset 0 0 8px rgba(0, 0, 0, 0.35);
+    0 0 8px 0 var(--glow, var(--ring)),
+    0 0 18px 2px var(--glow, var(--ring)),
+    inset 0 0 8px 0 var(--glow, var(--ring));
+  opacity: 0.9;
+  animation: arcRingPulse 3.6s ease-in-out infinite;
 }
-/* 环上流动的高光 */
-.arc-ring::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg,
-    transparent 0deg,
-    rgba(255, 255, 255, 0.85) 30deg,
-    transparent 80deg,
-    transparent 200deg,
-    rgba(255, 255, 255, 0.45) 235deg,
-    transparent 280deg);
-  -webkit-mask: radial-gradient(circle, transparent 0 41%, #000 43% 69%, transparent 71%);
-  mask: radial-gradient(circle, transparent 0 41%, #000 43% 69%, transparent 71%);
-  animation: arcRingSpin 6s linear infinite;
-  pointer-events: none;
+@keyframes arcRingPulse {
+  0%, 100% { filter: brightness(0.95); }
+  50% { filter: brightness(1.12); }
 }
-@keyframes arcRingSpin { to { transform: rotate(360deg); } }
+/* 前两环为万年黑环：暗色环体 + 冷紫微光，避免在浅纸上发死 */
+.arc-ring[data-i="0"], .arc-ring[data-i="1"] { --glow: #7d67a8; }
 .arc-ring > span {
   position: relative;
   z-index: 2;
@@ -684,31 +673,64 @@ comments: false
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #5a5148;
+  color: #f8f3e9;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
-.arc-ring:hover { transform: translateY(-3px); }
-.arc-ring.is-on {
-  transform: translateY(-5px) scale(1.08);
-  filter: drop-shadow(0 0 12px var(--ring, #3d3d47));
+.arc-ring:hover { transform: translateY(-2px); }
+.arc-ring:hover::before { opacity: 1; filter: brightness(1.14); }
+.arc-ring.is-on { transform: translateY(-3px) scale(1.12); }
+.arc-ring.is-on::before {
+  opacity: 1;
+  border-width: 4.5px;
+  box-shadow:
+    0 0 12px 1px var(--glow, var(--ring)),
+    0 0 26px 4px var(--glow, var(--ring)),
+    inset 0 0 11px 1px var(--glow, var(--ring));
 }
-.arc-ring.is-on > span { color: var(--arc-ink); }
+.arc-ring.is-on > span { color: #fff; }
+/* 第九环：九彩神环（彩虹细环，缓慢旋转） */
 .arc-ring--nine::before {
-  background:
-    radial-gradient(circle at 50% 50%,
-      transparent 0 40%,
-      rgba(255, 255, 255, 0.6) 41% 44%,
-      #2b2b33 45% 68%,
-      rgba(0, 0, 0, 0.55) 69% 74%,
-      transparent 75%);
-}
-.arc-ring--nine::after {
+  inset: 4px;
+  border: none;
   background: conic-gradient(from 0deg,
     #c74a3c, #d99a35, #c3c348, #4d9e6f, #479fae, #4f68b8, #9a54bb, #c44f97, #c74a3c);
-  -webkit-mask: radial-gradient(circle, transparent 0 41%, #000 43% 69%, transparent 71%);
-  mask: radial-gradient(circle, transparent 0 41%, #000 43% 69%, transparent 71%);
-  animation: arcRingSpin 14s linear infinite;
-  opacity: 0.92;
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 62%);
+  mask: radial-gradient(circle, transparent 58%, #000 62%);
+  box-shadow: none;
+  filter:
+    drop-shadow(0 0 4px rgba(255, 116, 168, 0.95))
+    drop-shadow(0 0 9px rgba(104, 216, 255, 0.9))
+    drop-shadow(0 0 16px rgba(176, 136, 255, 0.8));
+  animation: arcNineSpin 16s linear infinite;
+  opacity: 1;
 }
+.arc-ring--nine.is-on::before {
+  filter:
+    drop-shadow(0 0 6px rgba(255, 116, 168, 1))
+    drop-shadow(0 0 13px rgba(104, 216, 255, 0.95))
+    drop-shadow(0 0 24px rgba(176, 136, 255, 0.9));
+}
+/* 九彩环的彩色外发光：同形彩虹环模糊扩散到环外 */
+.arc-ring--nine::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+    #c74a3c, #d99a35, #c3c348, #4d9e6f, #479fae, #4f68b8, #9a54bb, #c44f97, #c74a3c);
+  -webkit-mask: radial-gradient(circle, transparent 50%, #000 66%);
+  mask: radial-gradient(circle, transparent 50%, #000 66%);
+  filter: blur(7px) saturate(1.8);
+  opacity: 1;
+  z-index: -1;
+  animation: arcNineSpin 16s linear infinite;
+  pointer-events: none;
+}
+.arc-ring--nine.is-on::after {
+  filter: blur(9px) saturate(2) brightness(1.2);
+  opacity: 1;
+}
+@keyframes arcNineSpin { to { transform: rotate(360deg); } }
 
 .arc-ring-box {
   position: relative;
@@ -860,7 +882,7 @@ comments: false
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arc-ring::after, .arc-ring--nine::after { animation: none; }
+  .arc-ring::before, .arc-ring--nine::after { animation: none; }
   .arc-dossier.is-show { animation: none; }
 }
 
