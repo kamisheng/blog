@@ -7,6 +7,7 @@
     @pointerdown="onDarkClick"
   >
     <form class="card" :class="{ shake: shaking }" @submit.prevent="handleSubmit" autocomplete="off">
+      <!-- 登录 / 注册 切换 -->
       <div class="modes" role="tablist" aria-label="登录或注册">
         <button
           type="button"
@@ -27,92 +28,189 @@
         <span class="modes-ind" aria-hidden="true"></span>
       </div>
 
-      <p class="eyebrow">{{ t.eyebrow }}</p>
-      <h1>{{ mode === 'register' ? '第一次来，先登记一下' : t.title }}</h1>
-      <p class="sub">{{ mode === 'register' ? '建好账号就能在这间房间里留下痕迹' : t.sub }}</p>
+      <!-- 3D 翻面：正面登录 / 背面注册 -->
+      <div class="flip">
+        <div
+          class="flip-inner"
+          :class="{ back: mode === 'register' }"
+          :style="{ height: faceHeight + 'px' }"
+        >
+          <!-- 正面：登录 -->
+          <div class="face front" :inert="mode !== 'login' ? '' : null">
+            <div ref="frontBody" class="face-body">
+              <p class="eyebrow">{{ eyebrow }}</p>
+              <h1 ref="frontTitle" class="wordmark" aria-label="夜深了，欢迎回来">
+                <span
+                  v-for="(ch, i) in loginChars"
+                  :key="'l' + i"
+                  class="ch"
+                  :class="{ punct: isPunct(ch) }"
+                >{{ ch }}</span>
+              </h1>
+              <p class="sub">{{ loginSub }}</p>
 
-      <div class="field">
-        <label for="user">{{ t.userLabel }}</label>
-        <input
-          id="user"
-          v-model="username"
-          name="user"
-          type="text"
-          :placeholder="t.userPh"
-          spellcheck="false"
-          :disabled="loading || dark"
-        />
-      </div>
+              <div class="field">
+                <label for="user">账号</label>
+                <input
+                  id="user"
+                  v-model="username"
+                  name="user"
+                  type="text"
+                  placeholder="请输入账号"
+                  autocomplete="username"
+                  spellcheck="false"
+                  :disabled="loading || dark"
+                  @input="onTyping"
+                />
+              </div>
 
-      <div class="field" v-if="mode === 'register'">
-        <label for="mail">邮箱</label>
-        <input
-          id="mail"
-          v-model.trim="email"
-          type="email"
-          placeholder="用来找回账号"
-          spellcheck="false"
-          :disabled="loading || dark"
-        />
-      </div>
+              <div class="field">
+                <label for="pass">密码</label>
+                <div class="pass-box">
+                  <input
+                    id="pass"
+                    v-model="password"
+                    name="pass"
+                    :type="showPass ? 'text' : 'password'"
+                    placeholder="请输入密码"
+                    autocomplete="current-password"
+                    :disabled="loading || dark"
+                    @input="onTyping"
+                    @focus="emit('peek')"
+                    @blur="emit('idle')"
+                  />
+                  <button
+                    type="button"
+                    class="eye-toggle"
+                    :aria-label="showPass ? T.hidePass : T.showPass"
+                    :disabled="dark"
+                    @click="showPass = !showPass"
+                  >
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                      <circle cx="12" cy="12" r="3" />
+                      <line v-if="!showPass" x1="4" y1="20" x2="20" y2="4" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
 
-      <div class="field">
-        <label for="pass">{{ t.passLabel }}</label>
-        <div class="pass-box">
-          <input
-            id="pass"
-            v-model="password"
-            name="pass"
-            :type="showPass ? 'text' : 'password'"
-            :placeholder="t.passPh"
-            :disabled="loading || dark"
-            @focus="emit('peek')"
-            @blur="emit('idle')"
-          />
-          <button
-            type="button"
-            class="eye-toggle"
-            :aria-label="showPass ? T.hidePass : T.showPass"
-            :disabled="dark"
-            @click="showPass = !showPass"
-          >
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-              <circle cx="12" cy="12" r="3" />
-              <line v-if="!showPass" x1="4" y1="20" x2="20" y2="4" />
-            </svg>
-          </button>
+              <p class="error" :class="{ show: errText }">{{ errText || ' ' }}</p>
+
+              <div class="row">
+                <label class="remember">
+                  <input v-model="remember" type="checkbox" :disabled="loading || dark" />
+                  <span>记住我</span>
+                </label>
+                <a href="#" class="forget" @click.prevent>忘记密码？</a>
+              </div>
+
+              <button type="submit" class="btn" :disabled="loading || dark">{{ frontBtnText }}</button>
+
+              <p class="demo">
+                <a class="signup-link" href="#" @click.prevent="switchMode('register')">还没有账号？去注册</a>
+              </p>
+            </div>
+          </div>
+
+          <!-- 背面：注册 -->
+          <div class="face back" :inert="mode !== 'register' ? '' : null">
+            <div ref="backBody" class="face-body">
+              <p class="eyebrow">{{ eyebrow }}</p>
+              <h1 ref="backTitle" class="wordmark" aria-label="第一次来，先登记一下">
+                <span
+                  v-for="(ch, i) in registerChars"
+                  :key="'r' + i"
+                  class="ch"
+                  :class="{ punct: isPunct(ch) }"
+                >{{ ch }}</span>
+              </h1>
+              <p class="sub">{{ registerSub }}</p>
+
+              <div class="field">
+                <label for="reg-user">账号</label>
+                <input
+                  id="reg-user"
+                  v-model="username"
+                  name="reg-user"
+                  type="text"
+                  placeholder="给自己起个名字"
+                  autocomplete="username"
+                  spellcheck="false"
+                  :disabled="loading || dark"
+                  @input="onTyping"
+                />
+              </div>
+
+              <div class="field">
+                <label for="reg-mail">邮箱</label>
+                <input
+                  id="reg-mail"
+                  v-model.trim="email"
+                  name="reg-mail"
+                  type="email"
+                  placeholder="用来找回账号"
+                  autocomplete="email"
+                  spellcheck="false"
+                  :disabled="loading || dark"
+                  @input="onTyping"
+                />
+              </div>
+
+              <div class="field">
+                <label for="reg-pass">密码</label>
+                <div class="pass-box">
+                  <input
+                    id="reg-pass"
+                    v-model="password"
+                    name="reg-pass"
+                    :type="showPass ? 'text' : 'password'"
+                    placeholder="6-32 位"
+                    autocomplete="new-password"
+                    :disabled="loading || dark"
+                    @input="onTyping"
+                  />
+                  <button
+                    type="button"
+                    class="eye-toggle"
+                    :aria-label="showPass ? T.hidePass : T.showPass"
+                    :disabled="dark"
+                    @click="showPass = !showPass"
+                  >
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                      <circle cx="12" cy="12" r="3" />
+                      <line v-if="!showPass" x1="4" y1="20" x2="20" y2="4" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="reg-pass2">确认密码</label>
+                <input
+                  id="reg-pass2"
+                  v-model="confirm"
+                  name="reg-pass2"
+                  type="password"
+                  placeholder="再输入一次"
+                  autocomplete="new-password"
+                  :disabled="loading || dark"
+                  @input="onTyping"
+                />
+              </div>
+
+              <p class="error" :class="{ show: errText }">{{ errText || ' ' }}</p>
+
+              <button type="submit" class="btn" :disabled="loading || dark">{{ backBtnText }}</button>
+
+              <p class="demo">
+                <a class="signup-link" href="#" @click.prevent="switchMode('login')">已经有账号了？去登录</a>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="field" v-if="mode === 'register'">
-        <label for="pass2">确认密码</label>
-        <input
-          id="pass2"
-          v-model="confirm"
-          type="password"
-          placeholder="再输入一次"
-          :disabled="loading || dark"
-        />
-      </div>
-
-      <p class="error" :class="{ show: errText }">{{ errText || ' ' }}</p>
-
-      <div class="row" v-if="mode === 'login'">
-        <label class="remember">
-          <input v-model="remember" type="checkbox" :disabled="loading || dark" />
-          <span>{{ t.remember }}</span>
-        </label>
-        <a href="#" class="forget" @click.prevent>{{ t.forget }}</a>
-      </div>
-
-      <button type="submit" class="btn" :disabled="loading || dark">{{ dark ? T.btnDark : (mode === 'register' ? '注册' : T[btnKey]) }}</button>
-
-      <p class="demo" v-if="!dark">
-        <a v-if="mode === 'login'" class="signup-link" href="#" @click.prevent="switchMode('register')">还没有账号？去注册</a>
-        <a v-else class="signup-link" href="#" @click.prevent="switchMode('login')">已经有账号了？去登录</a>
-      </p>
-      <p class="demo" v-else>{{ T.demoDark }}</p>
     </form>
 
     <!-- 关灯后的“手电筒”微光 -->
@@ -121,7 +219,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { T } from '../lib/lamp-i18n'
 
 const props = defineProps({
@@ -131,6 +229,11 @@ const props = defineProps({
 const emit = defineEmits(['peek', 'idle', 'surprise', 'success', 'dark-poke'])
 
 const wrapEl = ref(null)
+const frontTitle = ref(null)
+const backTitle = ref(null)
+const frontBody = ref(null)
+const backBody = ref(null)
+
 const mode = ref('login')
 const username = ref('')
 const email = ref('')
@@ -144,33 +247,125 @@ const errText = ref('')
 const btnKey = ref('btnLogin')
 
 const dark = computed(() => !props.lampOn)
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-// 关灯后，文案“黑到看不清”
-const t = computed(() =>
-  dark.value
-    ? {
-        eyebrow: '▓▓▓▓ ▓▓▓▓ · ▓▓▓▓',
-        title: T.value.titleDark,
-        sub: T.value.subDark,
-        userLabel: '▓▓',
-        userPh: '░░░░░░░░',
-        passLabel: '▓▓',
-        passPh: '░░░░░░░░',
-        remember: '▓▓▓',
-        forget: '▓▓▓▓？',
-      }
-    : {
-        eyebrow: T.value.eyebrow,
-        title: T.value.title,
-        sub: T.value.sub,
-        userLabel: T.value.userLabel,
-        userPh: T.value.userPh,
-        passLabel: T.value.passLabel,
-        passPh: T.value.passPh,
-        remember: T.value.remember,
-        forget: T.value.forget,
-      }
-)
+// ---------- 标题文案（随模式/明暗切换） ----------
+const eyebrow = computed(() => (dark.value ? '▓▓▓▓ ▓▓▓▓ · ▓▓▓▓' : T.value.eyebrow))
+const loginTitle = computed(() => (dark.value ? T.value.titleDark : T.value.title))
+const registerTitle = computed(() => (dark.value ? T.value.titleDark : '第一次来，先登记一下'))
+const loginSub = computed(() => (dark.value ? T.value.subDark : T.value.sub))
+const registerSub = computed(() => (dark.value ? T.value.subDark : '建好账号就能在这间房间里留下痕迹'))
+
+const PUNCT = '，。、,.；;：:！!？?·—'
+const toChars = (text) => Array.from(text).map((c) => (c === ' ' ? '\u00A0' : c))
+const loginChars = computed(() => toChars(loginTitle.value))
+const registerChars = computed(() => toChars(registerTitle.value))
+const isPunct = (c) => PUNCT.includes(c)
+
+const frontBtnText = computed(() => {
+  if (btnKey.value === 'btnWelcome') return T.value.btnWelcome
+  if (loading.value) return T.value.btnLoading
+  return T.value.btnLogin
+})
+const backBtnText = computed(() => (loading.value ? T.value.btnLoading : '注册'))
+
+// ---------- 翻面高度同步 ----------
+const frontH = ref(0)
+const backH = ref(0)
+const faceHeight = computed(() => (mode.value === 'login' ? frontH.value : backH.value))
+let ro = null
+
+function syncSizes() {
+  if (frontBody.value) {
+    const h = Math.ceil(frontBody.value.getBoundingClientRect().height)
+    if (h > 0) frontH.value = h
+  }
+  if (backBody.value) {
+    const h = Math.ceil(backBody.value.getBoundingClientRect().height)
+    if (h > 0) backH.value = h
+  }
+}
+
+// ---------- 磁吸标题（参考 G：字被光标吸过去） ----------
+let mx = -9999
+let my = -9999
+let magnetRaf = 0
+
+function onPointerMove(e) {
+  if (reduced || dark.value || props.finale) return
+  if (e.pointerType === 'touch') return
+  mx = e.clientX
+  my = e.clientY
+  if (!magnetRaf) magnetRaf = requestAnimationFrame(applyMagnet)
+}
+
+function applyMagnet() {
+  magnetRaf = 0
+  const el = mode.value === 'login' ? frontTitle.value : backTitle.value
+  if (!el) return
+  const R = 150
+  const chars = el.querySelectorAll('.ch')
+  for (const ch of chars) {
+    const r = ch.getBoundingClientRect()
+    const dx = mx - (r.left + r.width / 2)
+    const dy = my - (r.top + r.height / 2)
+    const d = Math.hypot(dx, dy)
+    if (d < R && d > 0.1) {
+      const f = (1 - d / R) * 12
+      ch.style.transform = `translate(${(dx / d) * f}px, ${(dy / d) * f}px)`
+    } else {
+      ch.style.transform = 'translate(0,0)'
+    }
+  }
+}
+
+// ---------- 打字火花（参考 G：光标处迸火花） ----------
+let mirror = null
+function ensureMirror() {
+  if (mirror) return mirror
+  mirror = document.createElement('span')
+  mirror.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;white-space:pre;pointer-events:none;'
+  document.body.appendChild(mirror)
+  return mirror
+}
+
+function caretX(input) {
+  const m = ensureMirror()
+  const cs = getComputedStyle(input)
+  m.style.font = cs.font
+  m.style.letterSpacing = cs.letterSpacing
+  m.style.fontSize = cs.fontSize
+  const val = input.value || ''
+  const upto = input.selectionStart == null ? val.length : input.selectionStart
+  m.textContent = input.type === 'password' ? '•'.repeat(upto) : val.slice(0, upto)
+  const padLeft = parseFloat(cs.paddingLeft) || 0
+  return padLeft + m.offsetWidth
+}
+
+function spawnSparks(x, y, n) {
+  if (reduced) return
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span')
+    s.className = 'typing-spark'
+    const a = Math.random() * Math.PI * 2
+    const dist = 18 + Math.random() * 26
+    s.style.left = x + 'px'
+    s.style.top = y + 'px'
+    s.style.setProperty('--tx', (Math.cos(a) * dist).toFixed(0) + 'px')
+    s.style.setProperty('--ty', (Math.sin(a) * dist).toFixed(0) + 'px')
+    document.body.appendChild(s)
+    setTimeout(() => s.remove(), 620)
+  }
+}
+
+function onTyping(e) {
+  if (reduced) return
+  const input = e.target
+  if (!input || !input.matches('input')) return
+  const r = input.getBoundingClientRect()
+  const x = r.left + Math.min(caretX(input), r.width - 6)
+  spawnSparks(x, r.top + r.height / 2, input.type === 'password' ? 2 : 3)
+}
 
 // ---------- 黑暗中的手电筒 ----------
 function setTorch(e) {
@@ -188,7 +383,6 @@ function onTorchMove(e) {
 let lastPoke = 0
 function onDarkClick(e) {
   if (!dark.value) return
-  // 手指点按时，微光直接出现在指尖
   setTorch(e)
   const now = Date.now()
   if (now - lastPoke < 1500) return
@@ -200,7 +394,6 @@ function onDarkClick(e) {
 function fail(key, msg) {
   errText.value = msg || T.value[key]
   shaking.value = false
-  // 强制重启抖动动画
   requestAnimationFrame(() => { shaking.value = true })
   setTimeout(() => { shaking.value = false }, 500)
   emit('surprise', errText.value)
@@ -208,9 +401,11 @@ function fail(key, msg) {
 
 function switchMode(next) {
   if (mode.value === next) return
+  if (loading.value || dark.value) return
   mode.value = next
   errText.value = ''
   btnKey.value = 'btnLogin'
+  showPass.value = false
 }
 
 const apiBase = window.__BLOG_API_BASE__ ||
@@ -309,6 +504,26 @@ async function handleSubmit() {
     fail('errWrong', msg)
   }
 }
+
+onMounted(() => {
+  syncSizes()
+  nextTick(syncSizes)
+  if (typeof ResizeObserver !== 'undefined') {
+    ro = new ResizeObserver(() => syncSizes())
+    if (frontBody.value) ro.observe(frontBody.value)
+    if (backBody.value) ro.observe(backBody.value)
+  }
+  window.addEventListener('pointermove', onPointerMove, { passive: true })
+  window.addEventListener('resize', syncSizes)
+})
+
+onUnmounted(() => {
+  if (ro) ro.disconnect()
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('resize', syncSizes)
+  if (magnetRaf) cancelAnimationFrame(magnetRaf)
+  if (mirror && mirror.parentNode) mirror.remove()
+})
 </script>
 
 <style scoped>
@@ -321,17 +536,18 @@ async function handleSubmit() {
 }
 .signup-link:hover { opacity: 0.7; }
 
-
+/* ---------- 登录/注册 切换 ---------- */
 .modes {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
   padding: 4px;
-  margin-bottom: 22px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: color-mix(in oklab, var(--card-bg) 70%, transparent);
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
 }
 
 .modes button {
@@ -339,7 +555,7 @@ async function handleSubmit() {
   z-index: 1;
   height: 34px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 10px;
   background: transparent;
   color: var(--ink-dim);
   font: inherit;
@@ -361,9 +577,13 @@ async function handleSubmit() {
   z-index: 0;
   width: calc(50% - 6px);
   height: 34px;
-  border-radius: 9px;
-  background: var(--accent);
-  box-shadow: 0 6px 16px color-mix(in oklab, var(--accent) 35%, transparent);
+  border-radius: 10px;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--accent) 88%, #fff 12%),
+    var(--accent) 62%,
+    color-mix(in oklab, var(--accent) 84%, #000 16%));
+  box-shadow: 0 6px 18px color-mix(in oklab, var(--accent) 35%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
@@ -371,7 +591,7 @@ async function handleSubmit() {
   transform: translateX(calc(100% + 4px));
 }
 
-
+/* ---------- 卡片外壳 ---------- */
 .card-wrap {
   position: relative;
   width: 384px;
@@ -380,7 +600,6 @@ async function handleSubmit() {
     opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s,
     transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
 }
-/* 关灯：卡片没入黑暗，只剩轮廓 */
 .card-wrap.off {
   opacity: 0.6;
   transform: scale(0.985);
@@ -395,7 +614,6 @@ async function handleSubmit() {
   box-shadow: none;
   filter: saturate(0.15) brightness(0.55) blur(0.7px);
 }
-/* 登录成功：谢幕退场 */
 .card-wrap.finale {
   opacity: 0;
   transform: translateY(-26px) scale(0.95);
@@ -420,18 +638,40 @@ async function handleSubmit() {
 }
 .card-wrap.off .torch { opacity: 1; }
 
+/* ---------- 磨砂暗玻璃卡片 ---------- */
 .card {
-  background: var(--card-bg);
-  border: 1.5px solid var(--accent);
-  border-radius: 18px;
-  padding: 30px 30px 22px;
+  position: relative;
+  padding: 24px 26px 22px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, rgba(255, 255, 255, 0.16));
+  background:
+    linear-gradient(150deg,
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.02) 42%,
+      rgba(255, 255, 255, 0.05)),
+    color-mix(in oklab, var(--card-bg) 62%, transparent);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
   box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent),
-    0 18px 50px -8px color-mix(in oklab, var(--accent-glow) 40%, #000),
-    0 0 60px -10px var(--accent-glow),
-    inset 0 1px 0 color-mix(in oklab, var(--accent) 20%, transparent);
-  backdrop-filter: blur(6px);
+    0 30px 80px -28px rgba(0, 0, 0, 0.85),
+    0 10px 30px -18px color-mix(in oklab, var(--accent-glow) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
   transition: border-color 0.7s ease, background 0.7s ease, box-shadow 0.7s ease, filter 0.7s ease;
+}
+/* 玻璃高光斜带 */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(120deg,
+    rgba(255, 255, 255, 0.20),
+    transparent 28%,
+    transparent 72%,
+    rgba(255, 255, 255, 0.05));
+  opacity: 0.6;
 }
 .card.shake { animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 @keyframes shake {
@@ -441,6 +681,32 @@ async function handleSubmit() {
   40%, 60%      { transform: translateX(4px); }
 }
 
+/* ---------- 3D 翻面 ---------- */
+.flip {
+  position: relative;
+  perspective: 1800px;
+}
+.flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.72s cubic-bezier(0.2, 0.75, 0.2, 1),
+    height 0.62s cubic-bezier(0.2, 0.75, 0.2, 1);
+  will-change: transform, height;
+}
+.flip-inner.back { transform: rotateY(180deg); }
+.face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.face.back { transform: rotateY(180deg); }
+.face-body { position: relative; }
+.flip-inner:not(.back) .face.back { pointer-events: none; }
+.flip-inner.back .face.front { pointer-events: none; }
+
+/* ---------- 头部 ---------- */
 .eyebrow {
   margin: 0 0 10px;
   font-family: var(--font-mono);
@@ -449,50 +715,63 @@ async function handleSubmit() {
   color: color-mix(in oklab, var(--accent) 80%, var(--ink-dim));
   transition: color 0.6s;
 }
-.card h1 {
+.wordmark {
   margin: 0 0 6px;
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 27px;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  line-height: 1.2;
   color: var(--ink);
+  user-select: none;
 }
-.card .sub {
-  margin: 0 0 22px;
+.wordmark .ch {
+  display: inline-block;
+  will-change: transform;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.35s;
+}
+.wordmark .ch.punct {
+  color: var(--accent);
+  text-shadow: 0 0 16px var(--accent-glow);
+}
+.sub {
+  margin: 0 0 20px;
   font-size: 12.5px;
   color: var(--ink-dim);
   letter-spacing: 0.3px;
 }
 
-.field { margin-bottom: 14px; }
+/* ---------- 玻璃输入框 ---------- */
+.field { margin-bottom: 13px; }
 .field label {
   display: block;
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--ink-dim);
   margin-bottom: 6px;
   letter-spacing: 0.4px;
 }
 .field input {
   width: 100%;
-  background: #0e1420;
-  border: 1.5px solid #232b38;
-  border-radius: 10px;
   padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
   color: var(--ink);
   font: inherit;
   font-size: 14px;
   outline: none;
+  backdrop-filter: blur(6px);
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
-.field input::placeholder { color: #4a5364; }
+.field input::placeholder { color: rgba(255, 255, 255, 0.32); }
 .field input:disabled { opacity: 0.6; }
 .field input:focus {
-  border-color: var(--accent);
-  background: #121a28;
+  border-color: color-mix(in oklab, var(--accent) 65%, rgba(255, 255, 255, 0.2));
+  background: rgba(255, 255, 255, 0.075);
   box-shadow:
-    0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent),
-    0 0 18px color-mix(in oklab, var(--accent-glow) 35%, transparent),
-    inset 0 0 14px color-mix(in oklab, var(--accent-glow) 10%, transparent);
+    0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent),
+    0 0 24px -8px var(--accent-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .pass-box { position: relative; }
@@ -544,9 +823,9 @@ async function handleSubmit() {
   width: 15px;
   height: 15px;
   margin: 0;
-  border: 1.5px solid #2c3646;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
   border-radius: 4px;
-  background: #0e1420;
+  background: rgba(255, 255, 255, 0.06);
   cursor: pointer;
   display: grid;
   place-content: center;
@@ -576,24 +855,26 @@ async function handleSubmit() {
 }
 .forget:hover { color: var(--accent); }
 
+/* ---------- 玻璃按钮 ---------- */
 .btn {
   width: 100%;
-  padding: 12px 14px;
-  border: 0;
-  border-radius: 10px;
+  margin-top: 4px;
+  padding: 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  border-radius: 12px;
   background: linear-gradient(180deg,
-    color-mix(in oklab, var(--accent) 90%, #fff 10%),
-    var(--accent) 60%,
-    color-mix(in oklab, var(--accent) 85%, #000 15%));
+    color-mix(in oklab, var(--accent) 88%, #fff 12%),
+    var(--accent) 62%,
+    color-mix(in oklab, var(--accent) 84%, #000 16%));
   color: #0a0f17;
   font: inherit;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 2px;
   cursor: pointer;
   box-shadow:
-    0 8px 20px -6px var(--accent-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 12px 30px -12px var(--accent-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: filter 0.2s, transform 0.1s, box-shadow 0.3s;
 }
 .btn:hover:not(:disabled)  { filter: brightness(1.08); }
@@ -607,16 +888,27 @@ async function handleSubmit() {
   color: color-mix(in oklab, var(--ink-dim) 75%, transparent);
   letter-spacing: 0.3px;
 }
-.demo code {
-  font-family: var(--font-mono);
-  color: var(--ink-dim);
-  background: #0e1420;
-  border: 1px solid #1e2735;
-  border-radius: 5px;
-  padding: 1px 6px;
-}
 
 @media (max-width: 820px) {
   .card-wrap { width: min(384px, 100%); }
+}
+</style>
+
+<style>
+/* 打字火花（追加到 body，需全局样式） */
+.typing-spark {
+  position: fixed;
+  z-index: 80;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  pointer-events: none;
+  animation: typingSpark 0.58s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes typingSpark {
+  from { transform: translate(0, 0) scale(1); opacity: 0.95; }
+  to   { transform: translate(var(--tx), var(--ty)) scale(0.1); opacity: 0; }
 }
 </style>
