@@ -1,0 +1,64 @@
+---
+title: 知识星球
+comments: false
+---
+
+<style>
+  /* 首屏防白闪：planet.css 加载前先把星球底色铺上（只作用于本页容器） */
+  .planet-root { background: #03050c; }
+</style>
+
+<link rel="stylesheet" href="/assets/planet/planet.css">
+
+<div class="planet-root" id="planetRoot">
+  <div class="pl-nebula pl-nebula-a"></div>
+  <div class="pl-nebula pl-nebula-b"></div>
+  <div id="stage" class="pl-stage"></div>
+  <div id="labels" class="pl-labels" aria-hidden="true"></div>
+  <div class="pl-grain"></div>
+
+  <header class="pl-hud">
+    <div class="pl-brand"><span class="pl-brand-dot"></span>Kami<span class="pl-brand-sep">/</span>Orbit</div>
+    <h1>知识星球</h1>
+    <p class="pl-sub"><em id="docCount">0</em> 篇文档 · 点阵聚成球体</p>
+  </header>
+
+  <nav class="pl-index" aria-label="文档索引">
+    <div class="pl-index-head"><span>Doc Index</span><span id="indexCount">00</span></div>
+    <ol class="pl-index-list" id="indexList"></ol>
+  </nav>
+
+  <aside class="pl-telemetry" aria-hidden="true">
+    <div class="pl-telemetry-row"><span>Nodes</span><b id="tNodes">0</b></div>
+    <div class="pl-telemetry-row"><span>Zoom</span><b id="tZoom">5.10</b></div>
+    <div class="pl-telemetry-row"><span>Focus</span><b id="tFocus">—</b></div>
+  </aside>
+
+  <div class="pl-corners" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+  <aside id="card" class="pl-card" role="dialog" aria-labelledby="cardTitle" aria-hidden="true">
+    <button id="cardClose" class="pl-card-close" type="button" aria-label="关闭卡片">✕</button>
+    <div class="pl-card-kicker">
+      <b id="cardNo">01</b><i></i><span>Doc Node</span>
+    </div>
+    <h2 id="cardTitle">—</h2>
+    <p id="cardSummary" class="pl-card-summary">—</p>
+    <div class="pl-card-foot">
+      <span id="cardUrl" class="pl-card-url">—</span>
+      <a id="cardLink" class="pl-card-btn" href="#" rel="noopener noreferrer">阅读全文 <span aria-hidden="true">→</span></a>
+    </div>
+  </aside>
+
+  <div class="pl-hint">
+    <span>拖拽旋转</span><span class="pl-hint-sep">/</span>
+    <span>滚轮 · 双指缩放</span><span class="pl-hint-sep">/</span>
+    <span>点击节点</span>
+  </div>
+
+  <div id="boot" class="pl-boot">
+    <span class="pl-boot-ring"></span>
+    <span id="bootText">正在构建星球…</span>
+  </div>
+</div>
+
+<script type="module" src="/assets/planet/planet.js"></script>

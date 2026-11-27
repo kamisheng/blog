@@ -211,9 +211,9 @@ navbar:
     Categories: #取名随意
       icon: fa-solid fa-folder #图标
       path: /categories/ #链接
-    Archives: 
-      path: /archives 
-      icon: fa-regular fa-archive # can be empty
+    知识星球:
+      path: /planet/
+      icon: fa-solid fa-satellite # can be empty
     Tags:
       path: /tags/
       icon: fa-solid fa-tags

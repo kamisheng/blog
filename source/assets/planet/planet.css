@@ -1,0 +1,349 @@
+/* =========================================================
+   知识星球 · 文档星球
+   页面嵌在主题 page 布局里（保留导航栏 / 页脚），
+   星球本体用 .planet-root 撑满内容卡片，内部全部绝对定位，
+   不污染 body 与主题其它页面的样式。
+   ========================================================= */
+
+/* 隐藏主题自动插入的页面标题与空评论区 */
+.page-template-content > h1 { display: none; }
+.page-template-comments { display: none; }
+
+.planet-root{
+  --ink: #ece9f7;
+  --ink-dim: #9a9ab8;
+  --ink-faint: #62627e;
+  --accent: #7fb2ff;
+
+  position: relative;
+  margin: -30px -30px -30px;
+  height: calc(100vh - 150px);
+  min-height: 460px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #03050c;
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+               "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  isolation: isolate;
+  text-align: left;
+}
+.planet-root *{ box-sizing: border-box; }
+
+/* 宇宙底色 + 主光晕 */
+.planet-root::before{
+  content: "";
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(900px 640px at 50% 44%, rgba(40, 82, 172, .28), transparent 64%),
+    radial-gradient(1300px 900px at 50% 42%, #071121 0%, #04060e 46%, #010207 100%);
+}
+.pl-nebula{
+  position: absolute; border-radius: 50%; pointer-events: none;
+  filter: blur(90px); opacity: .55;
+}
+.pl-nebula-a{
+  width: 54%; aspect-ratio: 1; left: -10%; top: -14%;
+  background: radial-gradient(circle, rgba(54, 96, 208, .20), transparent 70%);
+}
+.pl-nebula-b{
+  width: 46%; aspect-ratio: 1; right: -12%; bottom: -16%;
+  background: radial-gradient(circle, rgba(122, 72, 206, .16), transparent 70%);
+}
+/* 细颗粒噪点，压一压纯色渐变的塑料感 */
+.pl-grain{
+  position: absolute; inset: 0; pointer-events: none; opacity: .045;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='0.75'/></svg>");
+}
+
+.pl-stage{ position: absolute; inset: 0; z-index: 1; }
+.pl-stage canvas{
+  display: block;
+  opacity: 0;
+  transition: opacity .55s ease;
+  cursor: grab;
+}
+.planet-root.ready .pl-stage canvas{ opacity: 1; }
+.pl-stage canvas.grabbing{ cursor: grabbing; }
+
+/* ---------- 常驻节点标签 ---------- */
+.pl-labels{
+  position: absolute; inset: 0; z-index: 4;
+  pointer-events: none; overflow: hidden;
+}
+.pl-node-label{
+  position: absolute; left: 0; top: 0;
+  font-size: 11.5px; font-weight: 500; line-height: 1; letter-spacing: .03em;
+  color: rgba(236, 232, 250, .82);
+  text-shadow:
+    0 0 3px rgba(3, 6, 16, .95),
+    0 1px 10px rgba(3, 6, 16, .95),
+    0 0 22px rgba(3, 6, 16, .8);
+  white-space: nowrap;
+  will-change: transform, opacity;
+  transition: color .2s ease;
+}
+.pl-node-label.is-active{ color: #fff; }
+
+/* ---------- HUD ---------- */
+.pl-hud{
+  position: absolute; z-index: 5; pointer-events: none;
+  left: clamp(20px, 4%, 56px);
+  top: clamp(22px, 5%, 48px);
+  opacity: 0; transform: translateY(-6px);
+  transition: opacity .9s ease .25s, transform .9s ease .25s;
+}
+.planet-root.ready .pl-hud{ opacity: 1; transform: none; }
+.pl-brand{
+  display: flex; align-items: center; gap: 8px;
+  font: 600 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .28em; text-transform: uppercase; color: var(--ink-dim);
+}
+.pl-brand-dot{
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 12px var(--accent);
+}
+.pl-brand-sep{ color: var(--ink-faint); letter-spacing: 0; }
+.planet-root .pl-hud h1{
+  margin: 14px 0 7px;
+  font-family: "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+  font-size: clamp(23px, 3.4vw, 36px);
+  font-weight: 600; letter-spacing: .06em;
+  line-height: 1.2;
+  border: 0;
+}
+.pl-sub{
+  margin: 0; font-size: 12px; letter-spacing: .05em; color: var(--ink-dim);
+}
+.pl-sub em{ font-style: normal; color: var(--accent); }
+
+.pl-hint{
+  position: absolute; z-index: 5; left: 50%; bottom: 26px;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 14px;
+  font: 500 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-faint); pointer-events: none;
+  opacity: 0; transition: opacity .9s ease .45s;
+  white-space: nowrap;
+}
+.planet-root.ready .pl-hint{ opacity: 1; }
+.pl-hint-sep{ opacity: .4; }
+
+/* ---------- 右侧文档索引 ---------- */
+.pl-index{
+  position: absolute; z-index: 5;
+  right: clamp(16px, 3%, 48px); top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: flex-end;
+  opacity: 0; transition: opacity .9s ease .4s;
+  pointer-events: none;
+  max-height: calc(100% - 80px);
+}
+.planet-root.ready .pl-index{ opacity: 1; }
+.pl-index-head{
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+  font: 600 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--ink-faint);
+}
+.pl-index-head span:last-child{ color: var(--accent); }
+.pl-index-list{
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 1px;
+  pointer-events: auto;
+  overflow-y: auto;
+  max-height: 100%;
+  scrollbar-width: none;
+}
+.pl-index-list::-webkit-scrollbar{ display: none; }
+.pl-idx-item{
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  width: 100%; padding: 5.5px 0;
+  border: 0; background: none; cursor: pointer;
+  color: var(--ink-faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  transition: color .2s ease;
+  text-align: right;
+}
+.pl-idx-name{
+  font-size: 11px; letter-spacing: .03em; white-space: nowrap;
+  color: #f2effc; opacity: 0; transform: translateX(8px);
+  transition: opacity .22s ease, transform .22s ease;
+}
+.pl-idx-tick{
+  width: 18px; height: 1px; background: currentColor; opacity: .4;
+  transition: width .25s ease, opacity .2s ease;
+}
+.pl-idx-no{
+  width: 20px; text-align: right;
+  font-size: 10px; font-weight: 600; letter-spacing: .08em;
+}
+.pl-idx-item:hover, .pl-idx-item.is-hover, .pl-idx-item.is-active{ color: var(--accent); }
+.pl-idx-item:hover .pl-idx-name,
+.pl-idx-item.is-hover .pl-idx-name,
+.pl-idx-item.is-active .pl-idx-name{ opacity: 1; transform: none; }
+.pl-idx-item.is-active .pl-idx-tick{ width: 28px; opacity: 1; }
+
+/* ---------- 左下运行参数 ---------- */
+.pl-telemetry{
+  position: absolute; z-index: 5;
+  left: clamp(20px, 4%, 56px); bottom: 26px;
+  display: flex; flex-direction: column; gap: 7px;
+  font: 500 9.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint);
+  pointer-events: none;
+  opacity: 0; transition: opacity .9s ease .5s;
+}
+.planet-root.ready .pl-telemetry{ opacity: 1; }
+.pl-telemetry-row{ display: flex; align-items: baseline; gap: 10px; }
+.pl-telemetry-row b{
+  font-weight: 600; letter-spacing: .08em; color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 四角框线 ---------- */
+.pl-corners{
+  position: absolute; z-index: 3; pointer-events: none;
+  inset: clamp(10px, 1.6%, 20px);
+  opacity: 0; transition: opacity 1s ease .6s;
+}
+.planet-root.ready .pl-corners{ opacity: .55; }
+.pl-corners span{
+  position: absolute; width: 16px; height: 16px;
+  border: 0 solid rgba(126, 168, 255, .32);
+}
+.pl-corners span:nth-child(1){ left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
+.pl-corners span:nth-child(2){ right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
+.pl-corners span:nth-child(3){ left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
+.pl-corners span:nth-child(4){ right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+
+/* ---------- 文档卡片 ---------- */
+.pl-card{
+  position: absolute; z-index: 10; left: 50%; top: 50%;
+  width: min(430px, calc(100% - 40px));
+  padding: 26px 26px 22px;
+  border-radius: 20px;
+  background: linear-gradient(165deg, rgba(17, 27, 50, .94), rgba(8, 13, 26, .97));
+  border: 1px solid rgba(127, 178, 255, .22);
+  box-shadow:
+    0 40px 90px -20px rgba(0, 0, 0, .85),
+    0 0 0 1px rgba(255, 255, 255, .03) inset,
+    0 0 70px rgba(70, 120, 255, .16);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translate(-50%, -46%) scale(.95);
+  transition: opacity .3s ease, transform .42s cubic-bezier(.2, .85, .25, 1), visibility .3s;
+  overflow: hidden;
+}
+.pl-card::before{
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120% 80% at 18% 0%, rgba(127, 178, 255, .15), transparent 62%);
+}
+.pl-card.open{
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.pl-card-close{
+  position: absolute; top: 13px; right: 13px; z-index: 2;
+  width: 32px; height: 32px; padding: 0;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(127, 178, 255, .18);
+  background: rgba(255, 255, 255, .04);
+  color: #c9d7f5; font-size: 14px; line-height: 1;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, transform .25s ease;
+}
+.pl-card-close:hover{
+  background: rgba(127, 178, 255, .18); color: #fff; transform: rotate(90deg);
+}
+.pl-card-kicker{
+  display: flex; align-items: center; gap: 10px;
+  font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .26em; text-transform: uppercase; color: var(--ink-faint);
+}
+.pl-card-kicker b{ color: var(--accent); font-weight: 700; }
+.pl-card-kicker i{
+  display: block; width: 26px; height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+.planet-root .pl-card h2{
+  position: relative;
+  margin: 16px 0 10px;
+  font-family: "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+  font-size: 22px; line-height: 1.45; font-weight: 600; letter-spacing: .03em;
+  border: 0;
+}
+.pl-card-summary{
+  position: relative;
+  margin: 0;
+  font-size: 13.5px; line-height: 1.8; color: #a9b6d4;
+}
+.pl-card-summary[hidden]{ display: none; }
+.pl-card-foot{
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-top: 22px;
+}
+.pl-card-url{
+  min-width: 0;
+  font: 500 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .02em; color: var(--ink-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pl-card-btn{
+  flex: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 999px;
+  background: linear-gradient(120deg, #aacaff, #7fb2ff);
+  color: #06122b; text-decoration: none;
+  font-size: 13px; font-weight: 600; letter-spacing: .02em;
+  box-shadow: 0 12px 26px -12px rgba(120, 170, 255, .9);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.pl-card-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px -12px rgba(120, 170, 255, 1);
+  color: #06122b;
+}
+
+/* ---------- 载入 ---------- */
+.pl-boot{
+  position: absolute; inset: 0; z-index: 20;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  background: #03050c;
+  font: 500 11px/1.8 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--ink-dim);
+  text-align: center; padding: 24px;
+  transition: opacity .45s ease, visibility .45s;
+}
+.pl-boot.hide{ opacity: 0; visibility: hidden; }
+.pl-boot-ring{
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid rgba(127, 178, 255, .18);
+  border-top-color: var(--accent);
+  animation: pl-spin 1s linear infinite;
+}
+@keyframes pl-spin{ to{ transform: rotate(360deg); } }
+
+@media (max-width: 900px){
+  .pl-index{ display: none; }
+}
+@media (max-width: 768px){
+  .planet-root{ margin: -26px -26px -26px; }
+}
+@media (max-width: 640px){
+  .planet-root{ margin: -1.2rem -0.2rem -1.2rem; border-radius: 14px; }
+  .pl-hint{ bottom: 18px; gap: 10px; font-size: 9.5px; letter-spacing: .12em; }
+  .pl-telemetry{ display: none; }
+  .pl-card{ padding: 22px 20px 18px; border-radius: 18px; }
+  .planet-root .pl-card h2{ font-size: 19px; }
+  .pl-card-foot{ flex-direction: column; align-items: stretch; }
+  .pl-card-btn{ justify-content: center; }
+  .pl-node-label{ font-size: 10px; }
+}
